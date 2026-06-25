@@ -40,11 +40,13 @@ const { next } = useStepper();
     </p>
 
     <!-- z10 顶部头部（白色横版 logo @ (11,41) 213×46 + 渐隐圆 + 状态栏） -->
-    <img
-      class="brand-logo"
-      :src="assetUrl('assets/img/logo-white.png')"
-      alt="网络空间安全学院"
-    />
+    <div class="brand-logo-wrap">
+      <img
+        class="brand-logo"
+        :src="assetUrl('assets/img/logo-white.png')"
+        alt="网络空间安全学院"
+      />
+    </div>
     <span class="deco-circle deco-circle-1" />
     <span class="deco-circle deco-circle-2" />
 
@@ -232,16 +234,20 @@ const { next } = useStepper();
   z-index: 9;
 }
 
-/* z10 头部白色 logo @ (11,41) 213×46（设计稿蒙版裁切后原图顶部为空白，此处用 contain 完整展示横版 logo） */
-.brand-logo {
+/* z10 头部白色 logo @ (11,41) 213×46 */
+.brand-logo-wrap {
   position: absolute;
   left: 11px;
   top: 41px;
   width: 213px;
   height: 46px;
-  object-fit: contain;
-  object-position: left center;
+  overflow: hidden;
   z-index: 10;
+}
+.brand-logo {
+  display: block;
+  height: 46px;
+  width: auto;
 }
 
 /* 顶部右侧两个水平渐隐圆 22×22 @ (311,53)(340,53) */
