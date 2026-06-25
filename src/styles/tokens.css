@@ -1,0 +1,62 @@
+/**
+ * Design Tokens · 网安线上通知书
+ * 单一事实来源：颜色 / 字体 / 字号 / 间距 / 圆角 / 阴影
+ * 数值取自设计稿 网安线上通知书.sketch（详见 docs/落地蓝本.md §3）
+ */
+:root {
+  /* ---- 颜色 ---- */
+  --color-brand: #0050b5;
+  --color-brand-deep: #0a4ea1;
+  --color-brand-light: #4379bb;
+  --color-paper: #fff3d4;
+  --color-paper-deep: #ffecc4;
+  --color-line: #cccccc;
+  --color-bg: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-invert: #ffffff;
+  --color-serif-ink: #012a5c; /* 正文衬线字体色（取自设计稿） */
+  --gradient-brand: linear-gradient(180deg, #0a4ea1 0%, #0050b5 100%);
+  /* 欢迎页卡片：暖纸 → 半透明白(45.2%) → 蓝（取自设计稿 矩形2 渐变） */
+  --gradient-welcome-card: linear-gradient(
+    180deg,
+    #fff3d4 0%,
+    rgba(255, 255, 255, 0.69) 45.2%,
+    #4283d4 100%
+  );
+  /* 欢迎页主按钮：顶部蓝 → 底部暖纸（取自设计稿 分组1 路径 渐变，停止点延伸至 135%） */
+  --gradient-welcome-btn: linear-gradient(180deg, #0050b5 0%, #fff3d4 135%);
+
+  /* ---- 字体族 ---- */
+  --font-title: "AlimamaShuHeiTi", system-ui, sans-serif;
+  --font-button: "AlibabaPuHuiTi", system-ui, sans-serif;
+  --font-serif: "WenYuanSerifSC", "Source Han Serif SC", "Songti SC", serif;
+  --font-mono: "SourceHanSansCN", system-ui, sans-serif;
+
+  /* ---- 字号 ---- */
+  --fs-h1: 36px;
+  --fs-deco: 33px;
+  --fs-h2: 32px;
+  --fs-h3: 24px;
+  --fs-lg: 20px;
+  --fs-md: 18px;
+  --fs-base: 16px;
+  --fs-sm: 14px;
+  --fs-xs: 13px;
+  --fs-tip: 9px;
+
+  /* ---- 间距 ---- */
+  --space-page-x: 18px;
+  --space-section: 24px;
+
+  /* ---- 圆角 ---- */
+  --radius-card: 16px;
+  --radius-btn: 22px;
+  --radius-input: 8px;
+
+  /* ---- 阴影 ---- */
+  --shadow-card: 0 8px 24px rgba(0, 80, 181, 0.12);
+
+  /* ---- 设计稿基准（移动端） ---- */
+  --design-width: 393px;
+  --design-height: 852px;
+}

@@ -1,0 +1,59 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  background: #e9edf3;
+  line-height: 1.5;
+  /* 使用浏览器默认(次像素)渲染，使中文字形笔画更扎实，避免 antialiased 导致整体偏浅 */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+img {
+  display: block;
+  /* 不设 max-width:100%：本应用为固定 393×852 绝对布局，
+     设计图均按设计稿显式 width/height 定位，部分图宽于舞台（如底部装饰 446、
+     通知书背景 1386、拍立得 416）。max-width:100% 会将其钳制到容器宽度，
+     导致图片被压窄、位置错位。舞台已 overflow:hidden，无溢出风险。 */
+}
+
+button {
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+  outline: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* 禁用移动端点击高亮 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
