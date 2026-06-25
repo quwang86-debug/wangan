@@ -39,14 +39,12 @@ const { next } = useStepper();
       祝贺你被网络空间安全学院录取。愿你以理性探索未知，以技术守护信任，在网络空间安全的时代征程中写下属于自己的新篇章。
     </p>
 
-    <!-- z10 顶部头部（白色横版 logo @ (11,41) 213×46 + 渐隐圆 + 状态栏） -->
-    <div class="brand-logo-wrap">
-      <img
-        class="brand-logo"
-        :src="assetUrl('assets/img/logo-white.png')"
-        alt="网络空间安全学院"
-      />
-    </div>
+    <!-- z10 头部白色 logo @ (11,41) 213×46 + 渐隐圆 + 状态栏 -->
+    <img
+      class="brand-logo"
+      :src="assetUrl('assets/img/logo-white.png')"
+      alt="网络空间安全学院"
+    />
     <span class="deco-circle deco-circle-1" />
     <span class="deco-circle deco-circle-2" />
 
@@ -234,20 +232,16 @@ const { next } = useStepper();
   z-index: 9;
 }
 
-/* z10 头部白色 logo @ (11,41) 213×46 */
-.brand-logo-wrap {
+/* z10 头部白色 logo @ (11,41) 213×46，contain 适配不溢出 */
+.brand-logo {
   position: absolute;
   left: 11px;
   top: 41px;
   width: 213px;
   height: 46px;
-  overflow: hidden;
+  object-fit: contain;
+  object-position: left center;
   z-index: 10;
-}
-.brand-logo {
-  display: block;
-  height: 46px;
-  width: auto;
 }
 
 /* 顶部右侧两个水平渐隐圆 22×22 @ (311,53)(340,53) */
