@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
 import { useStepper } from "@/composables/useStepper";
+import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
 let timer: number | undefined;
@@ -20,7 +21,7 @@ onUnmounted(() => window.clearTimeout(timer));
     <div class="card-gradient" />
 
     <!-- z3 素材底部 @ (2,639) 390×218，填充不透明度 0.3 -->
-    <img class="footer-deco" src="/assets/img/footer-deco.png" alt="" />
+    <img class="footer-deco" :src="assetUrl('assets/img/footer-deco.png')" alt="" />
 
     <!-- z4 二进制装饰文本 @ (25,97) 382×722 -->
     <p class="binary-text" aria-hidden="true">
@@ -57,7 +58,7 @@ onUnmounted(() => window.clearTimeout(timer));
     </svg>
 
     <!-- z6 波浪 @ (-176,1120) 393×118（设计稿层，视口外） -->
-    <img class="wave-bottom" src="/assets/img/wave-bottom.png" alt="" />
+    <img class="wave-bottom" :src="assetUrl('assets/img/wave-bottom.png')" alt="" />
 
     <!-- z7 进度条描边 @ (55,376) 295×50 r15 -->
     <div class="progress-track" />

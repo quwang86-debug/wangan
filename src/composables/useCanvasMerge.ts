@@ -1,4 +1,5 @@
 import { loadImage, drawCover } from "@/utils/image";
+import { assetUrl } from "@/utils/asset";
 
 /**
  * 拍立得相框照片白窗（相对相框图的百分比）。
@@ -12,7 +13,7 @@ export const POLAROID_WINDOW = {
   height: 0.53,
 };
 
-const FRAME_SRC = "/assets/img/polaroid.png";
+const FRAME_SRC = assetUrl("assets/img/polaroid.png");
 
 /**
  * 合影合成：将用户照片以 cover 方式绘入相框白窗，再叠加相框。

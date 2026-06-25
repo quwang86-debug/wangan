@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useStepper } from "@/composables/useStepper";
+import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
 
-/** 通知书内页：直接使用设计稿证书图，暂不套打姓名（占位与真实姓名均不渲染） */
-const noticeImg = "/assets/img/notice-paper.png";
+const noticeImg = assetUrl("assets/img/notice-paper.png");
+const noticeBg = assetUrl("assets/img/notice-bg.png");
+const noticeLogo = assetUrl("assets/img/notice-logo.png");
 </script>
 
 <template>
@@ -14,7 +16,7 @@ const noticeImg = "/assets/img/notice-paper.png";
     <div class="bg-fill" />
 
     <!-- z2 整屏背景图 @(-476,0) 1386×852 -->
-    <img class="notice-bg" src="/assets/img/notice-bg.png" alt="" />
+    <img class="notice-bg" :src="noticeBg" alt="" />
 
     <!-- z3 z4 顶部右侧渐隐圆（本页渐变方向与欢迎页相反） -->
     <span class="deco-circle deco-circle-1" />
@@ -46,7 +48,7 @@ const noticeImg = "/assets/img/notice-paper.png";
     </span>
 
     <!-- z6 通知书蓝 logo @(18,47) 199×40 -->
-    <img class="notice-logo" src="/assets/img/notice-logo.png" alt="网络空间安全学院" />
+    <img class="notice-logo" :src="noticeLogo" alt="网络空间安全学院" />
 
     <!-- z7 通知书内页 @(18,139) 357×502，蒙版裁切 -->
     <div class="notice-paper-wrap">

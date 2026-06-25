@@ -6,6 +6,7 @@ import { useStudentStore } from "@/stores/student";
 import { useCanvasMerge } from "@/composables/useCanvasMerge";
 import { useCamera } from "@/composables/useCamera";
 import { fileToDataUrl, downloadDataUrl, shareImage } from "@/utils/image";
+import { assetUrl } from "@/utils/asset";
 
 const store = useStudentStore();
 const { name, photoSource } = storeToRefs(store);
@@ -80,7 +81,7 @@ const polaroidWinStyle = {
     <div class="bg-gradient-panel" />
 
     <!-- z3 底部装饰 @ (0,633) 390×218，填充不透明度 0.3 -->
-    <img class="footer-deco" src="/assets/img/footer-deco.png" alt="" />
+    <img class="footer-deco" :src="assetUrl('assets/img/footer-deco.png')" alt="" />
 
     <!-- z4 二进制装饰文本 @ (25,97) 382×722 -->
     <p class="binary-text" aria-hidden="true">
@@ -121,10 +122,10 @@ const polaroidWinStyle = {
     <!-- z6 标题区 @ (32,153) -->
     <h1 class="title">我在网安等你</h1>
     <p class="subtitle">{{ name || "X" }}同学·2026级新生</p>
-    <img class="photo-badge" src="/assets/img/photo-badge.png" alt="" />
+    <img class="photo-badge" :src="assetUrl('assets/img/photo-badge.png')" alt="" />
 
     <!-- z7 波浪 @ (-176,1120) 393×118（设计稿位于画板下方，裁切不可见） -->
-    <img class="wave-bottom" src="/assets/img/wave-bottom.png" alt="" />
+    <img class="wave-bottom" :src="assetUrl('assets/img/wave-bottom.png')" alt="" />
 
     <!-- z8 下载按钮 @ (35,756) 147×36 -->
     <button class="btn-download" type="button" :disabled="busy" @click="onDownload">
@@ -155,7 +156,7 @@ const polaroidWinStyle = {
           muted
         />
       </div>
-      <img class="polaroid-frame" src="/assets/img/polaroid.png" alt="拍立得相框" />
+      <img class="polaroid-frame" :src="assetUrl('assets/img/polaroid.png')" alt="拍立得相框" />
     </div>
 
     <!-- 交互：上传 / 拍照（设计稿无对应图层，透明热区覆盖拍立得底部） -->

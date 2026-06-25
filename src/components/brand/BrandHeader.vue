@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import StatusBar from "@/components/base/StatusBar.vue";
+import { assetUrl } from "@/utils/asset";
 
 const props = withDefaults(
   defineProps<{
@@ -11,8 +13,11 @@ const props = withDefaults(
 );
 
 // 蓝底用白色 logo，白底用蓝色 logo
-const logoSrc =
-  props.tone === "white" ? "/assets/img/logo-white.png" : "/assets/img/notice-logo.png";
+const logoSrc = computed(() =>
+  props.tone === "white"
+    ? assetUrl("assets/img/logo-white.png")
+    : assetUrl("assets/img/notice-logo.png"),
+);
 </script>
 
 <template>

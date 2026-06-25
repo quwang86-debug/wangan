@@ -2,6 +2,7 @@
 import { storeToRefs } from "pinia";
 import { useStudentStore } from "@/stores/student";
 import { useStepper } from "@/composables/useStepper";
+import { assetUrl } from "@/utils/asset";
 
 const { name } = storeToRefs(useStudentStore());
 const { next } = useStepper();
@@ -17,13 +18,13 @@ const { next } = useStepper();
     <h1 class="title">欢迎，{{ name || "新同学" }}！</h1>
 
     <!-- z4 底部装饰图 393×220 @ (0,637) -->
-    <img class="footer-deco" src="/assets/img/footer-deco.png" alt="" />
+    <img class="footer-deco" :src="assetUrl('assets/img/footer-deco.png')" alt="" />
 
     <!-- z5 校徽 170×170 @ (111,158) -->
-    <img class="emblem" src="/assets/img/emblem.png" alt="校徽" />
+    <img class="emblem" :src="assetUrl('assets/img/emblem.png')" alt="校徽" />
 
     <!-- z6 花纹 180×44 @ (111,747) -->
-    <img class="pattern" src="/assets/img/pattern.png" alt="" />
+    <img class="pattern" :src="assetUrl('assets/img/pattern.png')" alt="" />
 
     <!-- z7 主按钮 177×44 @ (111,594)，12px 圆角 -->
     <button class="cta" type="button" @click="next('welcome')">开始身份核验</button>

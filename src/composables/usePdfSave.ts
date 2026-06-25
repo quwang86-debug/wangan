@@ -1,4 +1,5 @@
 import { loadImage, downloadDataUrl } from "@/utils/image";
+import { assetUrl } from "@/utils/asset";
 
 /**
  * 通知书姓名套打层（相对证书图的百分比），与 NoticeView 预览保持一致。
@@ -10,7 +11,7 @@ export const NOTICE_NAME_POS = {
   fontRatio: 0.042, // 字号相对证书图宽度
 };
 
-const PAPER_SRC = "/assets/img/notice-paper.png";
+const PAPER_SRC = assetUrl("assets/img/notice-paper.png");
 
 /**
  * 通知书保存：把姓名合成进证书图，导出可下载/长按保存的 PNG。

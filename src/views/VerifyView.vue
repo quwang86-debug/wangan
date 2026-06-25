@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useStudentStore } from "@/stores/student";
 import { useStepper } from "@/composables/useStepper";
+import { assetUrl } from "@/utils/asset";
 
 const store = useStudentStore();
 const { next } = useStepper();
@@ -93,7 +94,7 @@ function onVerify() {
     <button class="submit-btn" type="button" @click="onVerify">去认证</button>
 
     <!-- z9 底部装饰图 @(-53,660) 446×192 -->
-    <img class="verify-deco" src="/assets/img/verify-deco.png" alt="" />
+    <img class="verify-deco" :src="assetUrl('assets/img/verify-deco.png')" alt="" />
 
     <!-- z10 Hello new student @(166,593) -->
     <p class="hello-text">Hello<br />new student</p>

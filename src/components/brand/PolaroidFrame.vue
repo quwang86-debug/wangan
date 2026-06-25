@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { POLAROID_WINDOW } from "@/composables/useCanvasMerge";
+import { assetUrl } from "@/utils/asset";
 
 defineProps<{
   /** 用户照片（dataURL 或 url），为空时显示占位 */
@@ -24,7 +25,7 @@ const winStyle = {
     </div>
     <!-- 相框层（社媒风格，含 Hello! new student） -->
     <img
-      src="/assets/img/polaroid.png"
+      :src="assetUrl('assets/img/polaroid.png')"
       alt="拍立得相框"
       class="absolute inset-0 w-full h-full object-contain pointer-events-none"
     />
