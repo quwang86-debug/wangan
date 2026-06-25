@@ -35,7 +35,12 @@ function onVerify() {
     <div class="warm-overlay" />
 
     <!-- z4 头部：白 logo 占位 + 渐隐圆 -->
-    <span class="brand-logo" aria-hidden="true" />
+    <!-- z4 头部白色 logo @ (11,41) 213×46 -->
+    <img
+      class="brand-logo"
+      :src="assetUrl('assets/img/logo-white.png')"
+      alt="网络空间安全学院"
+    />
     <span class="deco-circle deco-circle-1" />
     <span class="deco-circle deco-circle-2" />
 
@@ -159,13 +164,15 @@ function onVerify() {
   opacity: 0.6;
 }
 
-/* z4 头部白色 logo 占位 @(11,41) 213×46 */
+/* z4 头部白色 logo @ (11,41) 213×46 */
 .brand-logo {
   position: absolute;
   left: 11px;
   top: 41px;
   width: 213px;
   height: 46px;
+  object-fit: contain;
+  object-position: left center;
   z-index: 4;
 }
 

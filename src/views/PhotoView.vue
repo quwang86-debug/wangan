@@ -91,8 +91,12 @@ const polaroidWinStyle = {
       11101100
     </p>
 
-    <!-- z5 顶部头部（白 logo 占位 + 渐隐圆 + 状态栏） -->
-    <span class="brand-logo" aria-hidden="true" />
+    <!-- z5 头部白色 logo @ (17,41) 213×46（分组5 @(15,0) + 白logo @(2,41)） -->
+    <img
+      class="brand-logo"
+      :src="assetUrl('assets/img/logo-white.png')"
+      alt="网络空间安全学院"
+    />
     <span class="deco-circle deco-circle-1" />
     <span class="deco-circle deco-circle-2" />
     <span class="status-time">9:41</span>
@@ -242,13 +246,15 @@ const polaroidWinStyle = {
   z-index: 4;
 }
 
-/* z5 头部 */
+/* z5 头部白色 logo @ (17,41) 213×46 */
 .brand-logo {
   position: absolute;
   left: 17px;
   top: 41px;
   width: 213px;
   height: 46px;
+  object-fit: contain;
+  object-position: left center;
   z-index: 5;
 }
 .deco-circle {

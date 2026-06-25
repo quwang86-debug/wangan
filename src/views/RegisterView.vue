@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { assetUrl } from "@/utils/asset";
+
 const REGISTER_URL = "https://admission.example.edu.cn/register";
 
 function goRegister() {
@@ -14,8 +16,12 @@ function goRegister() {
       01101010 10011100 00110111 11000101 10100011 000111010 10 1 010 01 10 1010 0 001100 1010 11100100 01011001 10001110 01110001 11010100 00101110 10110101 01001011 11110011 00111000 10010110 01100111 000 001 1010 001100 0 100 001 001100 11001001 00001101 10111010 01010010 11101100
     </p>
 
-    <!-- z3 顶部头部（白 logo 占位 + 渐隐圆 + 状态栏） -->
-    <span class="brand-logo" aria-hidden="true" />
+    <!-- z3 头部白色 logo @ (11,41) 213×46 -->
+    <img
+      class="brand-logo"
+      :src="assetUrl('assets/img/logo-white.png')"
+      alt="网络空间安全学院"
+    />
     <span class="deco-circle deco-circle-1" />
     <span class="deco-circle deco-circle-2" />
 
@@ -108,13 +114,15 @@ function goRegister() {
   z-index: 2;
 }
 
-/* z3 头部 */
+/* z3 头部白色 logo @ (11,41) 213×46 */
 .brand-logo {
   position: absolute;
   left: 11px;
   top: 41px;
   width: 213px;
   height: 46px;
+  object-fit: contain;
+  object-position: left center;
   z-index: 3;
 }
 
