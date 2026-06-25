@@ -11,7 +11,7 @@ export const NOTICE_NAME_POS = {
   fontRatio: 0.042, // 字号相对证书图宽度
 };
 
-const PAPER_SRC = assetUrl("assets/img/notice-paper.png");
+const PAPER_SRC = assetUrl("assets/img/notice-paper.jpg");
 
 /**
  * 通知书保存：把姓名合成进证书图，导出可下载/长按保存的 PNG。

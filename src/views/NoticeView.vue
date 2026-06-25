@@ -4,7 +4,7 @@ import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
 
-const noticeImg = assetUrl("assets/img/notice-paper.png");
+const noticeImg = assetUrl("assets/img/notice-paper.jpg");
 const noticeBg = assetUrl("assets/img/notice-bg.png");
 const noticeLogo = assetUrl("assets/img/notice-logo.png");
 </script>
