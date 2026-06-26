@@ -1,41 +1,31 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { POLAROID_WINDOW } from "@/composables/useCanvasMerge";
 import { useStudentStore } from "@/stores/student";
 import { useCanvasMerge } from "@/composables/useCanvasMerge";
-import { useCamera } from "@/composables/useCamera";
 import { fileToDataUrl, downloadDataUrl, shareImage } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
 
 const store = useStudentStore();
 const { name, photoSource } = storeToRefs(store);
 const { compose } = useCanvasMerge();
-const camera = useCamera();
 
 const fileInput = ref<HTMLInputElement | null>(null);
-const videoEl = ref<HTMLVideoElement | null>(null);
 const busy = ref(false);
 const message = ref("");
+
+/** 避免「新同学同学」；已填姓名时去掉末尾重复的「同学」 */
+const subtitleLabel = computed(() => {
+  const n = name.value.trim();
+  let label = !n || n === "新同学" ? "X" : n;
+  if (label.endsWith("同学")) label = label.slice(0, -2);
+  return `${label}同学·2026级新生`;
+});
 
 async function onFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0];
   if (!file) return;
   photoSource.value = await fileToDataUrl(file);
-}
-
-async function onOpenCamera() {
-  try {
-    await camera.start(videoEl.value!);
-  } catch {
-    message.value = camera.error.value ?? "摄像头不可用";
-  }
-}
-
-function onCapture() {
-  if (!videoEl.value) return;
-  photoSource.value = camera.capture(videoEl.value);
-  camera.stop();
 }
 
 async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
@@ -63,12 +53,6 @@ function onShare() {
   });
 }
 
-const polaroidWinStyle = {
-  top: `${POLAROID_WINDOW.top * 100}%`,
-  left: `${POLAROID_WINDOW.left * 100}%`,
-  width: `${POLAROID_WINDOW.width * 100}%`,
-  height: `${POLAROID_WINDOW.height * 100}%`,
-};
 </script>
 
 <template>
@@ -125,7 +109,7 @@ const polaroidWinStyle = {
 
     <!-- z6 标题区 @ (32,153) -->
     <h1 class="title">我在网安等你</h1>
-    <p class="subtitle">{{ name || "X" }}同学·2026级新生</p>
+    <p class="subtitle">{{ subtitleLabel }}</p>
     <img class="photo-badge" :src="assetUrl('assets/img/photo-badge.png')" alt="" />
 
     <!-- z7 波浪 @ (-176,1120) 393×118（设计稿位于画板下方，裁切不可见） -->
@@ -144,38 +128,24 @@ const polaroidWinStyle = {
     <!-- z10 卡片渐变 @ (36,301) 317×332 r15 -->
     <div class="card" />
 
-    <!-- z11 拍立得相框 @ (-8,226) 416×546 -->
+    <!-- z11 拍立得 @ (-8,226) 416×546：779×550 原图左上裁切（与设计稿蒙版一致） -->
     <div class="polaroid">
-      <!-- 照片白窗 / 摄像头预览 -->
-      <div
-        class="polaroid-photo"
-        :style="polaroidWinStyle"
-        @click="!camera.active.value && fileInput?.click()"
-      >
-        <img v-if="photoSource && !camera.active.value" :src="photoSource" alt="入学合影" />
-        <video
-          v-show="camera.active.value"
-          ref="videoEl"
-          playsinline
-          muted
-        />
+      <div class="polaroid-art">
+        <!-- 照片白窗：未上传时透明，透出 z10 卡片渐变 -->
+        <div
+          class="polaroid-photo"
+          role="button"
+          tabindex="0"
+          aria-label="上传照片"
+          @click="fileInput?.click()"
+          @keydown.enter="fileInput?.click()"
+        >
+          <img v-if="photoSource" :src="photoSource" alt="入学合影" />
+        </div>
+        <img class="polaroid-frame" :src="assetUrl('assets/img/polaroid.png')" alt="" />
       </div>
-      <img class="polaroid-frame" :src="assetUrl('assets/img/polaroid.png')" alt="拍立得相框" />
     </div>
 
-    <!-- 交互：上传 / 拍照（设计稿无对应图层，透明热区覆盖拍立得底部） -->
-    <button
-      class="hit-upload"
-      type="button"
-      aria-label="上传照片"
-      @click="fileInput?.click()"
-    />
-    <button
-      class="hit-camera"
-      type="button"
-      :aria-label="camera.active.value ? '拍照' : '使用摄像头'"
-      @click="camera.active.value ? onCapture() : onOpenCamera()"
-    />
     <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileChange" />
 
     <p v-if="message" class="toast">{{ message }}</p>
@@ -326,7 +296,6 @@ const polaroidWinStyle = {
   position: absolute;
   left: 36px;
   top: 215px;
-  width: 152px;
   margin: 0;
   font-family: var(--font-mono);
   font-weight: 500;
@@ -334,6 +303,7 @@ const polaroidWinStyle = {
   line-height: 21px;
   letter-spacing: 2px;
   color: #fff;
+  white-space: nowrap;
   z-index: 6;
 }
 .photo-badge {
@@ -448,24 +418,37 @@ const polaroidWinStyle = {
   z-index: 10;
 }
 
-/* z11 拍立得 @ (-8,226) 416×546 */
+/* z11 拍立得 @ (-8,226) 416×546，内层 779×550 按设计稿 pattern fit 左上裁切 */
 .polaroid {
   position: absolute;
   left: -8px;
-  top: 226px;
+  top: 246px;
   width: 416px;
   height: 546px;
   overflow: hidden;
   z-index: 11;
 }
+.polaroid-art {
+  position: absolute;
+  /* 779×550 原图平移：空白白窗中心对齐卡片 (36,301) 317×332 */
+  left: -194px;
+  top: -27px;
+  width: 779px;
+  height: 550px;
+}
 .polaroid-photo {
   position: absolute;
+  /* 相框 PNG 透明窗（779×550 坐标系） */
+  left: 209px;
+  top: 37px;
+  width: 376px;
+  height: 463px;
   overflow: hidden;
-  background: #fff;
+  background: transparent;
   cursor: pointer;
+  z-index: 1;
 }
-.polaroid-photo img,
-.polaroid-photo video {
+.polaroid-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -475,36 +458,10 @@ const polaroidWinStyle = {
   position: absolute;
   left: 0;
   top: 0;
-  width: 416px;
-  height: 546px;
-  object-fit: contain;
+  width: 779px;
+  height: 550px;
   pointer-events: none;
-}
-
-/* 交互热区（透明，不影响视觉 1:1） */
-.hit-upload {
-  position: absolute;
-  left: 36px;
-  top: 680px;
-  width: 155px;
-  height: 36px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  z-index: 12;
-}
-.hit-camera {
-  position: absolute;
-  left: 200px;
-  top: 680px;
-  width: 155px;
-  height: 36px;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  z-index: 12;
+  z-index: 2;
 }
 
 /* 提示信息（设计稿无对应图层） */

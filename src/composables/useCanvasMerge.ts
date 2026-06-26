@@ -2,16 +2,14 @@ import { loadImage, drawCover } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
 
 /**
- * 拍立得相框照片白窗（相对相框图的百分比）。
- * PolaroidFrame 预览与合成共用同一组坐标，确保所见即所得。
- * 可对照设计稿精调。
+ * 合成用白窗：相对 polaroid.png 自然像素（3508×2480）的百分比。
  */
 export const POLAROID_WINDOW = {
-  top: 0.17,
-  left: 0.29,
-  width: 0.44,
-  height: 0.53,
-};
+  left: 939 / 3508,
+  top: 166 / 2480,
+  width: 1694 / 3508,
+  height: 2088 / 2480,
+} as const;
 
 const FRAME_SRC = assetUrl("assets/img/polaroid.png");
 

@@ -57,3 +57,12 @@ ol {
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+/* 设计稿「编组4」：顶部状态栏（时间 / 信号 / Wifi / 电量）落地隐藏 */
+.status-time,
+.status-icons,
+.ico-cellular,
+.ico-wifi,
+.ico-battery {
+  display: none !important;
+}

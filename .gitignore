@@ -6,3 +6,9 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 *.tsbuildinfo
+
+# 本地设计稿解压与备份，不入库
+.sketch-extract/
+.sketch_tmp/
+*.sketch
+wangan-main.zip
