@@ -56,18 +56,11 @@ function onShare() {
 </script>
 
 <template>
-  <!-- 设计稿基准画板 393×852，所有元素按 spec 坐标 1:1 绝对定位 -->
-  <div class="photo-stage">
-    <!-- z1 全屏蓝底 -->
-    <div class="bg-blue" />
+  <div class="photo-page">
+    <div class="bg-gradient-panel" aria-hidden="true" />
 
-    <!-- z2 矩形 4 @ (0,146) 425×721，渐变填充不透明度 0.6 -->
-    <div class="bg-gradient-panel" />
-
-    <!-- z3 底部装饰 @ (0,633) 390×218，填充不透明度 0.3 -->
     <img class="footer-deco" :src="assetUrl('assets/img/footer-deco.png')" alt="" />
 
-    <!-- z4 二进制装饰文本 @ (25,97) 382×722 -->
     <p class="binary-text" aria-hidden="true">
       01101010 10011100 00110111 11000101 10100011 000111010 10 1 010 01 10 1010 0 001100 1010
       11100100 01011001 10001110 01110001 11010100 00101110 10110101 01001011 11110011 00111000
@@ -75,114 +68,115 @@ function onShare() {
       11101100
     </p>
 
-    <!-- z5 头部白色 logo @ (17,41) 213×46（分组5 @(15,0) + 白logo @(2,41)） -->
-    <img
-      class="brand-logo"
-      :src="assetUrl('assets/img/logo-white.png')"
-      alt="网络空间安全学院"
-    />
-    <span class="deco-circle deco-circle-1" />
-    <span class="deco-circle deco-circle-2" />
-    <span class="status-time">9:41</span>
-    <span class="status-icons">
-      <svg class="ico-cellular" viewBox="0 0 17 11" fill="#fff" aria-hidden="true">
-        <rect x="0" y="7" width="3" height="4" rx="0.5" />
-        <rect x="4.5" y="4" width="3" height="7" rx="0.5" />
-        <rect x="9" y="2" width="3" height="9" rx="0.5" />
-        <rect x="14" y="0" width="3" height="11" rx="0.5" />
-      </svg>
-      <svg class="ico-wifi" viewBox="0 0 15 11" fill="#fff" aria-hidden="true">
-        <path
-          d="M7.5 0C11 0 13.9 1.2 15 2.3l-1.5 1.6C12.6 3 10.2 2.1 7.5 2.1S2.4 3 1.5 3.9L0 2.3C1.1 1.2 4 0 7.5 0Z"
-        />
-        <path
-          d="M7.5 4.2c2.1 0 4 .8 4.8 1.6L10.8 7.4C10.2 6.8 9 6.3 7.5 6.3S4.8 6.8 4.2 7.4L2.7 5.8C3.5 5 5.4 4.2 7.5 4.2Z"
-        />
-        <path d="M7.5 8.2c.9 0 1.7.4 2.1.9L7.5 11 5.4 9.1c.4-.5 1.2-.9 2.1-.9Z" />
-      </svg>
-      <svg class="ico-battery" viewBox="0 0 24 11" aria-hidden="true">
-        <rect x="0.5" y="0.5" width="21" height="10" rx="2.5" fill="none" stroke="#fff" opacity="0.35" />
-        <rect x="2" y="2" width="18" height="7" rx="1.5" fill="#fff" />
-        <rect x="23" y="4" width="1" height="4" rx="0.5" fill="#fff" opacity="0.4" />
-      </svg>
-    </span>
+    <header class="brand-header">
+      <img
+        class="brand-logo"
+        :src="assetUrl('assets/img/logo-white.png')"
+        alt="网络空间安全学院"
+      />
+      <span class="deco-circle deco-circle-1" />
+      <span class="deco-circle deco-circle-2" />
+    </header>
 
-    <!-- z6 标题区 @ (32,153) -->
-    <h1 class="title">我在网安等你</h1>
-    <p class="subtitle">{{ subtitleLabel }}</p>
-    <img class="photo-badge" :src="assetUrl('assets/img/photo-badge.png')" alt="" />
+    <div class="photo-body">
+      <h1 class="title">我在网安等你</h1>
+      <p class="subtitle">{{ subtitleLabel }}</p>
+      <img class="photo-badge" :src="assetUrl('assets/img/photo-badge.png')" alt="" />
 
-    <!-- z7 波浪 @ (-176,1120) 393×118（设计稿位于画板下方，裁切不可见） -->
-    <img class="wave-bottom" :src="assetUrl('assets/img/wave-bottom.png')" alt="" />
+      <div class="polaroid-stage">
+        <div class="card" aria-hidden="true" />
 
-    <!-- z8 下载按钮 @ (35,756) 147×36 -->
-    <button class="btn-download" type="button" :disabled="busy" @click="onDownload">
-      下载合影图片
-    </button>
-
-    <!-- z9 分享按钮 @ (211,758) 147×35 -->
-    <button class="btn-share" type="button" :disabled="busy" @click="onShare">
-      分享到朋友圈/小红书
-    </button>
-
-    <!-- z10 卡片渐变 @ (36,301) 317×332 r15 -->
-    <div class="card" />
-
-    <!-- z11 拍立得 @ (-8,226) 416×546：779×550 原图左上裁切（与设计稿蒙版一致） -->
-    <div class="polaroid">
-      <div class="polaroid-art">
-        <!-- 照片白窗：未上传时透明，透出 z10 卡片渐变 -->
-        <div
-          class="polaroid-photo"
-          role="button"
-          tabindex="0"
-          aria-label="上传照片"
-          @click="fileInput?.click()"
-          @keydown.enter="fileInput?.click()"
-        >
-          <img v-if="photoSource" :src="photoSource" alt="入学合影" />
+        <div class="polaroid-scaler">
+          <div class="polaroid">
+            <div class="polaroid-art">
+              <div
+                class="polaroid-photo"
+                role="button"
+                tabindex="0"
+                aria-label="上传照片"
+                @click="fileInput?.click()"
+                @keydown.enter="fileInput?.click()"
+              >
+                <img v-if="photoSource" :src="photoSource" alt="入学合影" />
+              </div>
+              <img class="polaroid-frame" :src="assetUrl('assets/img/polaroid.png')" alt="" />
+            </div>
+          </div>
         </div>
-        <img class="polaroid-frame" :src="assetUrl('assets/img/polaroid.png')" alt="" />
       </div>
+
+      <div class="action-bar">
+        <button class="btn-download" type="button" :disabled="busy" @click="onDownload">
+          下载合影图片
+        </button>
+        <button class="btn-share" type="button" :disabled="busy" @click="onShare">
+          分享到朋友圈/小红书
+        </button>
+      </div>
+
+      <p v-if="message" class="toast">{{ message }}</p>
     </div>
 
     <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileChange" />
-
-    <p v-if="message" class="toast">{{ message }}</p>
   </div>
 </template>
 
 <style scoped>
-/* 画板 393×852 */
-.photo-stage {
+.photo-page {
   position: relative;
-  width: var(--design-width);
-  height: var(--design-height);
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 640px;
   overflow: hidden;
-  background: #fff;
+  background: var(--color-brand);
 }
 
-/* z1 全屏蓝 #0050B5 */
-.bg-blue {
+/* 顶部品牌：真实移动端安全区布局，不再保留设计稿假状态栏 */
+.brand-header {
+  position: absolute;
+  left: clamp(11px, 3.6vw, 18px);
+  right: clamp(26px, 7vw, 31px);
+  top: max(env(safe-area-inset-top, 0px), 12px);
+  height: 46px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.brand-logo {
   position: absolute;
   left: 0;
   top: 0;
-  width: 393px;
-  height: 852px;
-  background: var(--color-brand);
-  z-index: 1;
+  width: clamp(190px, 54vw, 213px);
+  height: 46px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.deco-circle {
+  position: absolute;
+  top: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(to left, var(--color-paper), rgba(255, 243, 212, 0));
+}
+.deco-circle-1 {
+  right: 29px;
+}
+.deco-circle-2 {
+  right: 0;
 }
 
 /* z2 矩形 4 @ (0,146) 425×721，from 底→顶 #DBD5C5→透明灰，填充不透明度 0.6 */
 .bg-gradient-panel {
   position: absolute;
   left: 0;
-  top: 146px;
-  width: 425px;
-  height: 721px;
+  top: clamp(110px, 17.1vh, 146px);
+  width: 100%;
+  min-height: clamp(560px, 84.6vh, 721px);
   background: linear-gradient(to top, #dbd5c5, rgba(204, 204, 204, 0));
   opacity: 0.6;
+  pointer-events: none;
   z-index: 2;
 }
 
@@ -190,164 +184,201 @@ function onShare() {
 .footer-deco {
   position: absolute;
   left: 0;
-  top: 633px;
-  width: 390px;
-  height: 218px;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(176px, 25.6vh, 218px);
   object-fit: cover;
   opacity: 0.3;
+  pointer-events: none;
   z-index: 3;
 }
 
 /* z4 二进制文本 @ (25,97) 382×722，文源宋体 18px 白 15% 字距 15 */
 .binary-text {
   position: absolute;
-  left: 25px;
-  top: 97px;
-  width: 382px;
-  height: 722px;
+  left: clamp(14px, 6.4vw, 25px);
+  right: clamp(8px, 2.5vw, 14px);
+  top: clamp(72px, 11.4vh, 97px);
+  bottom: clamp(32px, 4.5vh, 48px);
   margin: 0;
   overflow: hidden;
   font-family: var(--font-serif);
   font-weight: 300;
-  font-size: 18px;
+  font-size: clamp(14px, 4.6vw, 18px);
   line-height: 1.448;
-  letter-spacing: 15px;
+  letter-spacing: clamp(8px, 3.8vw, 15px);
   color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
   z-index: 4;
 }
 
-/* z5 头部白色 logo @ (17,41) 213×46 */
-.brand-logo {
-  position: absolute;
-  left: 17px;
-  top: 41px;
-  width: 213px;
-  height: 46px;
-  object-fit: contain;
-  object-position: left center;
-  z-index: 5;
-}
-.deco-circle {
-  position: absolute;
-  top: 53px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: linear-gradient(to left, var(--color-paper), rgba(255, 243, 212, 0));
-  z-index: 5;
-}
-.deco-circle-1 {
-  left: 317px;
-}
-.deco-circle-2 {
-  left: 346px;
-}
-.status-time {
-  position: absolute;
-  left: 33px;
-  top: 12px;
-  width: 54px;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 21px;
-  letter-spacing: -0.28px;
-  color: #fff;
-  z-index: 5;
-}
-.status-icons {
-  position: absolute;
-  left: 309px;
-  top: 17px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 5;
-}
-.ico-cellular {
-  width: 17px;
-  height: 11px;
-}
-.ico-wifi {
-  width: 15px;
-  height: 11px;
-}
-.ico-battery {
-  width: 24px;
-  height: 11px;
+/* 主内容区：移动端流式布局，首屏可见拍立得主体 */
+.photo-body {
+  position: relative;
+  z-index: 8;
+  padding-top: clamp(56px, 8vh, 72px);
+  padding-bottom: max(clamp(24px, 4vh, 36px), env(safe-area-inset-bottom, 0px));
 }
 
-/* z6 标题区（分组 2 @ 32,153） */
+/* z6 标题区 @ (32,160) */
 .title {
-  position: absolute;
-  left: 32px;
-  top: 160px;
-  width: 198px;
-  margin: 0;
+  position: relative;
+  margin: clamp(24px, 4vh, 36px) 0 0 clamp(18px, 8.1vw, 32px);
+  width: fit-content;
+  max-width: calc(100% - clamp(100px, 28vw, 120px));
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: 32px;
-  line-height: 39px;
+  font-size: clamp(26px, 8.1vw, 32px);
+  line-height: 1.22;
   color: #fff;
   z-index: 6;
 }
+
 .subtitle {
-  position: absolute;
-  left: 36px;
-  top: 215px;
-  margin: 0;
+  position: relative;
+  margin: clamp(8px, 1.2vh, 12px) 0 0 clamp(20px, 9.2vw, 36px);
   font-family: var(--font-mono);
   font-weight: 500;
-  font-size: 14px;
+  font-size: clamp(12px, 3.6vw, 14px);
   line-height: 21px;
   letter-spacing: 2px;
   color: #fff;
   white-space: nowrap;
   z-index: 6;
 }
+
 .photo-badge {
   position: absolute;
-  left: 283px;
-  top: 153px;
-  width: 86px;
-  height: 83px;
+  right: clamp(18px, 4.6vw, 24px);
+  top: clamp(48px, 6.5vh, 62px);
+  width: clamp(72px, 21.9vw, 86px);
+  height: clamp(70px, 21.1vw, 83px);
   object-fit: contain;
+  pointer-events: none;
   z-index: 6;
 }
 
-/* z7 波浪（画板外，overflow hidden 裁切） */
-.wave-bottom {
-  position: absolute;
-  left: -176px;
-  top: 1120px;
-  width: 393px;
-  height: 118px;
-  object-fit: cover;
-  z-index: 7;
+/*
+ * 拍立得 + 卡片：外层固定 416×546 宽高比，内部沿用 779×550 坐标系百分比定位，
+ * 宽度随视口居中缩放，蒙版与白窗对齐关系不变。
+ */
+.polaroid-stage {
+  position: relative;
+  width: min(calc(100% - clamp(24px, 7%, 32px)), 416px);
+  aspect-ratio: 416 / 546;
+  margin: clamp(6px, 1.2vh, 10px) auto 0;
+  z-index: 11;
 }
 
-/* z8 下载按钮 @ (35,756) 147×36，底暖纸→顶蓝 渐变，填充不透明度 0.8，胶囊形 */
-.btn-download {
+/* z10 卡片 @ (36,301) 317×332 r15 — 相对 polaroid-stage 换算百分比 */
+.card {
   position: absolute;
-  left: 35px;
-  top: 756px;
-  width: 147px;
-  height: 36px;
-  border: 0;
+  left: calc(44 / 416 * 100%);
+  top: calc(55 / 546 * 100%);
+  width: calc(317 / 416 * 100%);
+  height: calc(332 / 546 * 100%);
+  border-radius: 15px;
+  background: linear-gradient(
+    to bottom,
+    #a4cddb 0%,
+    rgba(255, 255, 255, 0.69) 45.15%,
+    #4283d4 100%
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+.polaroid-scaler {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+}
+
+/* z11 拍立得 @ (-8,246) 416×546 */
+.polaroid {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.polaroid-art {
+  position: absolute;
+  left: calc(-194 / 416 * 100%);
+  top: calc(-27 / 546 * 100%);
+  width: calc(779 / 416 * 100%);
+  height: calc(550 / 546 * 100%);
+}
+
+.polaroid-photo {
+  position: absolute;
+  left: calc(209 / 779 * 100%);
+  top: calc(37 / 550 * 100%);
+  width: calc(376 / 779 * 100%);
+  height: calc(463 / 550 * 100%);
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.polaroid-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.polaroid-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 底部按钮组 */
+.action-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(8px, 4vw, 16px);
+  margin: clamp(10px, 1.6vh, 14px) clamp(18px, 8.9vw, 35px) 0;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.btn-download,
+.btn-share {
+  margin: 0;
   padding: 0;
-  border-radius: 18px;
+  border: 0;
+  box-sizing: border-box;
   background: transparent;
   text-align: center;
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: 14px;
-  line-height: 36px;
   color: #fff;
   cursor: pointer;
   user-select: none;
-  z-index: 8;
+  pointer-events: auto;
+  flex-shrink: 0;
 }
+
+.btn-download {
+  width: clamp(130px, 37.4vw, 147px);
+  height: clamp(32px, 9.2vw, 36px);
+  border-radius: 18px;
+  font-size: clamp(12px, 3.6vw, 14px);
+  line-height: clamp(32px, 9.2vw, 36px);
+}
+
 .btn-download::before {
   content: "";
   position: absolute;
@@ -357,34 +388,15 @@ function onShare() {
   opacity: 0.8;
   z-index: -1;
 }
-.btn-download:disabled {
-  cursor: not-allowed;
-}
-.btn-download:disabled::before {
-  opacity: 0.5;
+
+.btn-share {
+  width: clamp(130px, 37.4vw, 147px);
+  height: clamp(31px, 8.9vw, 35px);
+  border-radius: 17.5px;
+  font-size: clamp(11px, 3.3vw, 13px);
+  line-height: clamp(31px, 8.9vw, 35px);
 }
 
-/* z9 分享按钮 @ (211,758) 147×35，渐变 + 图层不透明度 0.8，胶囊形 */
-.btn-share {
-  position: absolute;
-  left: 211px;
-  top: 758px;
-  width: 147px;
-  height: 35px;
-  border: 0;
-  padding: 0;
-  border-radius: 17.5px;
-  background: transparent;
-  text-align: center;
-  font-family: var(--font-title);
-  font-weight: 400;
-  font-size: 13px;
-  line-height: 35px;
-  color: #fff;
-  cursor: pointer;
-  user-select: none;
-  z-index: 9;
-}
 .btn-share::before {
   content: "";
   position: absolute;
@@ -394,88 +406,69 @@ function onShare() {
   opacity: 0.8;
   z-index: -1;
 }
+
+.btn-download,
+.btn-share {
+  position: relative;
+}
+
+.btn-download:disabled,
 .btn-share:disabled {
   cursor: not-allowed;
 }
+
+.btn-download:disabled::before,
 .btn-share:disabled::before {
   opacity: 0.5;
 }
 
-/* z10 卡片 @ (36,301) 317×332 r15 */
-.card {
-  position: absolute;
-  left: 36px;
-  top: 301px;
-  width: 317px;
-  height: 332px;
-  border-radius: 15px;
-  background: linear-gradient(
-    to bottom,
-    #a4cddb 0%,
-    rgba(255, 255, 255, 0.69) 45.15%,
-    #4283d4 100%
-  );
-  z-index: 10;
+.btn-download:active:not(:disabled)::before,
+.btn-share:active:not(:disabled)::before {
+  opacity: 0.65;
 }
 
-/* z11 拍立得 @ (-8,226) 416×546，内层 779×550 按设计稿 pattern fit 左上裁切 */
-.polaroid {
-  position: absolute;
-  left: -8px;
-  top: 246px;
-  width: 416px;
-  height: 546px;
-  overflow: hidden;
-  z-index: 11;
-}
-.polaroid-art {
-  position: absolute;
-  /* 779×550 原图平移：空白白窗中心对齐卡片 (36,301) 317×332 */
-  left: -194px;
-  top: -27px;
-  width: 779px;
-  height: 550px;
-}
-.polaroid-photo {
-  position: absolute;
-  /* 相框 PNG 透明窗（779×550 坐标系） */
-  left: 209px;
-  top: 37px;
-  width: 376px;
-  height: 463px;
-  overflow: hidden;
-  background: transparent;
-  cursor: pointer;
-  z-index: 1;
-}
-.polaroid-photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.polaroid-frame {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 779px;
-  height: 550px;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* 提示信息（设计稿无对应图层） */
+/* 提示信息 */
 .toast {
-  position: absolute;
-  left: 36px;
-  top: 810px;
-  width: 321px;
-  margin: 0;
+  position: relative;
+  margin: clamp(8px, 1.2vh, 12px) clamp(18px, 9.2vw, 36px) 0;
   text-align: center;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 18px;
   color: rgba(255, 255, 255, 0.9);
   z-index: 12;
+  pointer-events: none;
 }
+
+@media (max-height: 720px) {
+  .photo-body {
+    padding-top: 52px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .title {
+    margin-top: 20px;
+    font-size: clamp(24px, 7.5vw, 28px);
+  }
+
+  .subtitle {
+    margin-top: 6px;
+  }
+
+  .photo-badge {
+    top: 40px;
+    width: clamp(64px, 19vw, 76px);
+    height: clamp(62px, 18.5vw, 74px);
+  }
+
+  .polaroid-stage {
+    margin-top: 4px;
+    width: min(calc(100% - 72px), 320px);
+  }
+
+  .action-bar {
+    margin-top: 8px;
+  }
+}
+
 </style>

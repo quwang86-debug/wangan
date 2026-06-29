@@ -5,264 +5,270 @@ import { assetUrl } from "@/utils/asset";
 const { goto } = useStepper();
 
 const noticeImg = assetUrl("assets/img/notice-paper.jpg");
-const noticeBg = assetUrl("assets/img/notice-bg.png");
-const noticeLogo = assetUrl("assets/img/notice-logo.png");
+const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
 </script>
 
 <template>
-  <!-- 设计稿基准画板 393×852，所有元素按设计稿坐标 1:1 绝对定位 -->
-  <div class="notice-stage">
-    <!-- z1 全屏蓝底 #0050B5 -->
-    <div class="bg-fill" />
+  <div class="notice-page">
+    <!-- 背景装饰层：与欢迎页 footer-deco / pattern 同级平铺 -->
+    <div class="notice-bg-gradient" aria-hidden="true" />
+    <p class="notice-binary-backdrop" aria-hidden="true">
+      01101010 10011100 00110111 11000101 10100011 000111010 10 1 010 01 10 1010 0 001100 1010
+      11100100 01011001 10001110 01110001 11010100 00101110 10110101 01001011 11110011 00111000
+      10010110 01100111 000 001 1010 001100 0 100 001 001100 11001001 00001101 10111010 01010010
+      11101100
+    </p>
+    <img class="notice-bottom-deco" :src="noticeBottomDeco" alt="" />
 
-    <!-- z2 整屏背景图 @(-476,0) 1386×852 -->
-    <img class="notice-bg" :src="noticeBg" alt="" />
+    <header class="brand-header">
+      <img
+        class="brand-logo"
+        :src="assetUrl('assets/img/logo-white.png')"
+        alt="网络空间安全学院"
+      />
+      <span class="deco-circle deco-circle-1" />
+      <span class="deco-circle deco-circle-2" />
+    </header>
 
-    <!-- z3 z4 顶部右侧渐隐圆（本页渐变方向与欢迎页相反） -->
-    <span class="deco-circle deco-circle-1" />
-    <span class="deco-circle deco-circle-2" />
+    <!-- 主内容区：对应欢迎页 welcome-card，子元素区内绝对定位 -->
+    <section class="notice-stage" aria-label="录取通知书">
+      <div class="notice-paper-wrap">
+        <img :src="noticeImg" alt="录取通知书" class="notice-paper" />
+      </div>
 
-    <!-- z5 状态栏 -->
-    <span class="status-time">9:41</span>
-    <span class="status-icons">
-      <svg class="ico-cellular" viewBox="0 0 17 11" fill="#fff" aria-hidden="true">
-        <rect x="0" y="7" width="3" height="4" rx="0.5" />
-        <rect x="4.5" y="4" width="3" height="7" rx="0.5" />
-        <rect x="9" y="2" width="3" height="9" rx="0.5" />
-        <rect x="14" y="0" width="3" height="11" rx="0.5" />
-      </svg>
-      <svg class="ico-wifi" viewBox="0 0 15 11" fill="#fff" aria-hidden="true">
-        <path
-          d="M7.5 0C11 0 13.9 1.2 15 2.3l-1.5 1.6C12.6 3 10.2 2.1 7.5 2.1S2.4 3 1.5 3.9L0 2.3C1.1 1.2 4 0 7.5 0Z"
-        />
-        <path
-          d="M7.5 4.2c2.1 0 4 .8 4.8 1.6L10.8 7.4C10.2 6.8 9 6.3 7.5 6.3S4.8 6.8 4.2 7.4L2.7 5.8C3.5 5 5.4 4.2 7.5 4.2Z"
-        />
-        <path d="M7.5 8.2c.9 0 1.7.4 2.1.9L7.5 11 5.4 9.1c.4-.5 1.2-.9 2.1-.9Z" />
-      </svg>
-      <svg class="ico-battery" viewBox="0 0 24 11" aria-hidden="true">
-        <rect x="0.5" y="0.5" width="21" height="10" rx="2.5" fill="none" stroke="#fff" opacity="0.35" />
-        <rect x="2" y="2" width="18" height="7" rx="1.5" fill="#fff" />
-        <rect x="23" y="4" width="1" height="4" rx="0.5" fill="#fff" opacity="0.4" />
-      </svg>
-    </span>
+      <p class="save-tip">*长按保存通知书</p>
 
-    <!-- z6 通知书蓝 logo @(18,47) 199×40 -->
-    <img class="notice-logo" :src="noticeLogo" alt="网络空间安全学院" />
-
-    <!-- z7 通知书内页 @(18,139) 357×502，蒙版裁切 -->
-    <div class="notice-paper-wrap">
-      <img :src="noticeImg" alt="录取通知书" class="notice-paper" />
-    </div>
-
-    <!-- z8 生成合影按钮 @(18,707) 158×34 -->
-    <button class="btn-photo" type="button" @click="goto('photo-loading')">生成合影</button>
-
-    <!-- z9 长按保存提示 @(273,624) 102×21 -->
-    <p class="save-tip">*长按保存通知书</p>
-
-    <!-- z10 查看报道说明按钮 @(221,709) 154.1×30 -->
-    <button class="btn-register" type="button" @click="goto('register')">查看报道说明</button>
+      <div class="action-bar">
+        <button class="action-btn" type="button" @click="goto('photo-loading')">生成合影</button>
+        <button class="action-btn" type="button" @click="goto('register')">查看报道说明</button>
+      </div>
+    </section>
   </div>
 </template>
 
 <style scoped>
-/* 画板：393×852，蓝底铺满（对应设计稿 矩形4 #0050B5） */
-.notice-stage {
+.notice-page {
   position: relative;
-  width: var(--design-width);
-  height: var(--design-height);
-  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 640px;
   background: #0050b5;
   overflow: hidden;
 }
 
-/* z1 全屏蓝底 */
-.bg-fill {
+/* 暖灰渐变 @ (0,120) 393×721，填充不透明度 0.6 */
+.notice-bg-gradient {
   position: absolute;
   left: 0;
-  top: 0;
-  width: 393px;
-  height: 852px;
-  background: #0050b5;
+  right: 0;
+  top: clamp(72px, 8.9vh, 76px);
+  bottom: 0;
+  background: linear-gradient(to top, #dbd5c5, rgba(204, 204, 204, 0));
+  opacity: 0.6;
+  pointer-events: none;
   z-index: 1;
 }
 
-/* z2 背景装饰图 @(-476,0) 1386×852 */
-.notice-bg {
+/* 二进制底纹 @ (19,88) 382×722 */
+.notice-binary-backdrop {
   position: absolute;
-  left: -476px;
-  top: 0;
-  width: 1386px;
-  height: 852px;
-  object-fit: cover;
+  left: clamp(14px, 4.8vw, 19px);
+  right: clamp(8px, 2.5vw, 14px);
+  top: clamp(40px, 5.2vh, 44px);
+  bottom: clamp(28px, 4vh, 42px);
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-serif);
+  font-weight: 300;
+  font-size: clamp(14px, 4.6vw, 18px);
+  line-height: 1.448;
+  letter-spacing: clamp(8px, 3.8vw, 15px);
+  color: rgba(255, 255, 255, 0.15);
+  pointer-events: none;
   z-index: 2;
 }
 
-/* z3 z4 顶部渐隐圆 22×22 @ (311,53)(340,53)
-   圆形1: from{0,0.5}->to{1,0.5} 左透→右 #0050B5
-   圆形2: from{1,0.5}->to{0,0.5} 右 #0050B5→左透 */
+/* 底部装饰 6.png @ (-53,660) 446×192，贴视口底 */
+.notice-bottom-deco {
+  position: absolute;
+  left: -53px;
+  bottom: 0;
+  width: calc(100% + 53px);
+  height: clamp(160px, 22.5vh, 192px);
+  object-fit: cover;
+  object-position: center bottom;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* 顶部品牌：与欢迎页相同安全区布局 */
+.brand-header {
+  position: absolute;
+  left: clamp(11px, 3.6vw, 18px);
+  right: clamp(26px, 7vw, 31px);
+  top: max(env(safe-area-inset-top, 0px), 12px);
+  height: 46px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.brand-logo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(190px, 54vw, 213px);
+  height: 46px;
+  object-fit: contain;
+  object-position: left center;
+}
+
 .deco-circle {
   position: absolute;
-  top: 53px;
+  top: 12px;
   width: 22px;
   height: 22px;
   border-radius: 50%;
+  background: linear-gradient(to left, var(--color-paper), rgba(255, 243, 212, 0));
+  pointer-events: none;
 }
 .deco-circle-1 {
-  left: 311px;
-  background: linear-gradient(to right, rgba(255, 243, 212, 0), #0050b5);
-  z-index: 3;
+  right: 29px;
 }
 .deco-circle-2 {
-  left: 340px;
-  background: linear-gradient(to left, #0050b5, rgba(255, 243, 212, 0));
-  z-index: 4;
+  right: 0;
 }
 
-/* z5 状态栏（编组4 @(9,0)，时间/图标绝对坐标与欢迎页一致） */
-.status-time {
+/*
+ * 主舞台：设计稿 paper @(18,138) → 去状态栏后 top≈94
+ * bottom 留 btn @(693)+30 + 页底边距 ≈ 129px
+ */
+.notice-stage {
   position: absolute;
-  left: 18px;
-  top: 12px;
-  width: 54px;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 21px;
-  letter-spacing: -0.28px;
-  color: #fff;
+  left: clamp(18px, 4.6vw, 18px);
+  right: clamp(18px, 4.6vw, 18px);
+  top: clamp(88px, 11vh, 94px);
+  bottom: max(clamp(100px, 12vh, 129px), env(safe-area-inset-bottom, 0px));
   z-index: 5;
 }
-.status-icons {
-  position: absolute;
-  right: 24px;
-  top: 17px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 5;
-}
-.ico-cellular {
-  width: 17px;
-  height: 11px;
-}
-.ico-wifi {
-  width: 15px;
-  height: 11px;
-}
-.ico-battery {
-  width: 24px;
-  height: 11px;
-}
 
-/* z6 通知书蓝 logo @(18,47) 199×40 */
-.notice-logo {
-  position: absolute;
-  left: 18px;
-  top: 47px;
-  width: 199px;
-  height: 40px;
-  object-fit: contain;
-  z-index: 6;
-}
-
-/* z7 通知书内页 @(18,139) 357×502，蒙版裁切；内图 @(0.8,0) 355.6×503 */
+/* 通知书 @(18,138) 357×505 */
 .notice-paper-wrap {
   position: absolute;
-  left: 18px;
-  top: 139px;
-  width: 357px;
-  height: 502px;
-  overflow: hidden;
-  z-index: 7;
-}
-.notice-paper {
-  position: absolute;
-  left: 0.8px;
+  left: 0;
+  right: 0;
   top: 0;
-  width: 355.6px;
-  height: 503px;
+  bottom: clamp(68px, 10vh, 74px);
+  margin: 0 auto;
+  width: 100%;
+  max-width: 357px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.notice-paper {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  object-position: center top;
   -webkit-touch-callout: default;
   user-select: none;
+  pointer-events: auto;
 }
 
-/* z8 生成合影 @(18,707) 158×34，文字 @(49,713) 96×17 */
-.btn-photo {
-  position: absolute;
-  left: 18px;
-  top: 707px;
-  width: 158px;
-  height: 34px;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  /* 设计稿按钮为胶囊形（路径左右端半圆，半径=高度一半=17px） */
-  border-radius: 17px;
-  box-sizing: border-box;
-  background: #0a4ea1;
-  font-family: var(--font-button);
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 34px;
-  letter-spacing: 2px;
-  text-indent: 2px;
-  color: #fff;
-  text-align: center;
-  cursor: pointer;
-  user-select: none;
-  z-index: 8;
-}
-.btn-photo:active {
-  opacity: 0.85;
-}
-
-/* z9 长按保存提示 @(273,624) 102×21 */
+/* *长按保存 @(280,628)，右对齐 */
 .save-tip {
   position: absolute;
-  left: 273px;
-  top: 624px;
-  width: 102px;
-  height: 21px;
+  right: -7px;
+  bottom: clamp(66px, 8.7vh, 74px);
   margin: 0;
+  width: 102px;
+  max-width: 100%;
   font-family: var(--font-mono);
   font-weight: 400;
   font-size: 9px;
   line-height: 21px;
   letter-spacing: 0;
   color: #fff;
-  z-index: 9;
+  text-align: left;
+  pointer-events: none;
 }
 
-/* z10 查看报道说明 @(221,709) 154.1×30，文字 @(246.1,714.3) 110×15 */
-.btn-register {
+/* 按钮 @(25,693)(228,693) 154×30，间距 49px */
+.action-bar {
   position: absolute;
-  left: 221px;
-  top: 709px;
-  width: 154.1px;
-  height: 30px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+.action-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin: 0;
   padding: 0;
   border: 0;
-  /* 设计稿按钮为胶囊形（半径=高度一半=15px） */
-  border-radius: 15px;
   box-sizing: border-box;
-  background: #0a4ea1;
-  font-family: var(--font-button);
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 30px;
-  letter-spacing: 2px;
-  text-indent: 2px;
+  width: min(154px, calc((100% - 49px) / 2));
+  height: 30px;
+  border-radius: 15px;
+  background: transparent;
+  font-family: var(--font-title);
+  font-weight: 400;
+  font-size: clamp(14px, 4.07vw, 16px);
+  line-height: 19px;
+  letter-spacing: 0;
   color: #fff;
   text-align: center;
   cursor: pointer;
   user-select: none;
-  z-index: 10;
+  pointer-events: auto;
+  flex-shrink: 0;
 }
-.btn-register:active {
+.action-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to top, #0a4ea1, #fff3d4);
+  z-index: -1;
+}
+.action-btn::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: -6px;
+  bottom: -6px;
+}
+.action-btn:active::before {
   opacity: 0.85;
+}
+
+@media (max-height: 720px) {
+  .notice-stage {
+    top: clamp(76px, 10vh, 88px);
+    bottom: max(clamp(80px, 10vh, 100px), env(safe-area-inset-bottom, 0px));
+  }
+
+  .notice-bg-gradient {
+    top: clamp(60px, 8vh, 72px);
+  }
+
+  .notice-paper-wrap {
+    bottom: clamp(58px, 8.5vh, 68px);
+  }
+
+  .save-tip {
+    bottom: clamp(58px, 8vh, 66px);
+  }
 }
 </style>

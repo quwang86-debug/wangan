@@ -15,52 +15,46 @@ import { RouterView } from "vue-router";
 </template>
 
 <style scoped>
+/* 真机：全屏移动端视口 */
 .app-stage {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100%;
-  background: #e9edf3;
+  align-items: stretch;
+  justify-content: stretch;
+  min-height: 100dvh;
+  height: 100dvh;
+  background: var(--color-brand);
 }
 
-/* 桌面：393×852 手机壳预览 */
 .phone-shell {
   position: relative;
   width: 100%;
-  max-width: var(--design-width);
-  min-height: 100vh;
+  height: 100%;
   min-height: 100dvh;
-  margin: 0 auto;
-  background: var(--color-bg);
+  margin: 0;
+  background: transparent;
   overflow: hidden;
 }
 
-@media (max-width: 479px) {
-  .app-stage {
-    align-items: stretch;
-    justify-content: stretch;
-    min-height: 100dvh;
-    height: 100dvh;
-    background: var(--color-brand);
-  }
-
-  .phone-shell {
-    max-width: none;
-    width: 100%;
-    height: 100dvh;
-    min-height: 100dvh;
-    margin: 0;
-    background: transparent;
-  }
-}
-
+/* PC 预览：居中展示设计稿移动端尺寸，页面内部仍走同一套移动端布局 */
 @media (min-width: 480px) {
+  .app-stage {
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: #e9edf3;
+  }
+
   .phone-shell {
-    min-height: var(--design-height);
-    height: var(--design-height);
+    width: min(var(--design-width), calc(100vw - 24px));
+    height: min(var(--design-height), calc(100dvh - 24px));
+    min-height: 0;
+    flex-shrink: 0;
     border-radius: 24px;
     box-shadow: 0 20px 60px rgba(10, 78, 161, 0.18);
-    overflow-y: auto;
+    background: var(--color-brand);
+    overflow: hidden;
   }
 }
 </style>

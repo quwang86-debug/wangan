@@ -9,7 +9,8 @@
 html,
 body,
 #app {
-  height: 100%;
+  overflow: hidden;
+  height: 100dvh;
 }
 
 html {
@@ -19,23 +20,16 @@ html {
 body {
   font-family: var(--font-mono);
   color: var(--color-text);
-  background: #e9edf3;
+  background: var(--color-brand);
   line-height: 1.5;
   /* 使用浏览器默认(次像素)渲染，使中文字形笔画更扎实，避免 antialiased 导致整体偏浅 */
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
 }
 
-@media (max-width: 479px) {
-  html,
-  body,
-  #app {
-    overflow: hidden;
-    height: 100dvh;
-  }
-
+@media (min-width: 480px) {
   body {
-    background: var(--color-brand);
+    background: #e9edf3;
   }
 }
 
