@@ -1,11 +1,24 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { storeToRefs } from "pinia";
 import { useStepper } from "@/composables/useStepper";
+import { useStudentStore } from "@/stores/student";
 import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
+const { name } = storeToRefs(useStudentStore());
 
 const noticeImg = assetUrl("assets/img/notice-paper.jpg");
 const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
+
+const demoStudentNo = "202601001";
+const demoCollegeName = "网络空间安全学院";
+const demoMajorName = "网络空间安全";
+
+const noticeStudentName = computed(() => {
+  const value = name.value.trim();
+  return value && value !== "新同学" ? value : "网小安";
+});
 </script>
 
 <template>
@@ -34,6 +47,12 @@ const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
     <section class="notice-stage" aria-label="录取通知书">
       <div class="notice-paper-wrap">
         <img :src="noticeImg" alt="录取通知书" class="notice-paper" />
+        <div class="notice-paper-fields" aria-hidden="true">
+          <span class="paper-field paper-field-student-no">{{ demoStudentNo }}</span>
+          <span class="paper-field paper-field-student-name">{{ noticeStudentName }}</span>
+          <span class="paper-field paper-field-college">{{ demoCollegeName }}</span>
+          <span class="paper-field paper-field-major">{{ demoMajorName }}</span>
+        </div>
       </div>
 
       <p class="save-tip">*长按保存通知书</p>
@@ -153,14 +172,12 @@ const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
 
 /* 通知书 @(18,138) 357×505 */
 .notice-paper-wrap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: clamp(68px, 10vh, 74px);
+  position: relative;
   margin: 0 auto;
   width: 100%;
   max-width: 357px;
+  aspect-ratio: 2480 / 3508;
+  container-type: inline-size;
   overflow: hidden;
   pointer-events: none;
 }
@@ -168,12 +185,62 @@ const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
 .notice-paper {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   object-position: center top;
   -webkit-touch-callout: default;
   user-select: none;
   pointer-events: auto;
+}
+
+.notice-paper-fields {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.paper-field {
+  position: absolute;
+  font-family: "Founder", "FangSong", "STFangsong", var(--font-serif);
+  font-weight: 400;
+  font-size: calc(100cqw * 0.033613);
+  line-height: 1.1667;
+  color: #000;
+  white-space: nowrap;
+}
+
+/* 位置按通知书原图真实下划线 / 学号冒号后空白区域换算 */
+.paper-field-student-no {
+  left: 68.63%;
+  top: 38.10%;
+  font-family: "SourceHanSans-Regular", "Source Han Sans SC", var(--font-mono);
+  font-size: calc(100cqw * 0.02521);
+  line-height: 1.4444;
+  letter-spacing: 0;
+}
+
+/* 姓名 / 学院 / 专业：以各自下划线中心点为锚点 */
+.paper-field-student-name,
+.paper-field-college,
+.paper-field-major {
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.paper-field-student-name {
+  left: 23.69%;
+  top: 40.99%;
+}
+
+.paper-field-college {
+  left: 63.63%;
+  top: 48.12%;
+}
+
+.paper-field-major {
+  left: 47.22%;
+  top: 51.49%;
 }
 
 /* *长按保存 @(280,628)，右对齐 */
@@ -264,7 +331,7 @@ const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
   }
 
   .notice-paper-wrap {
-    bottom: clamp(58px, 8.5vh, 68px);
+    max-width: min(357px, calc((100dvh - 215px) * 0.707));
   }
 
   .save-tip {
