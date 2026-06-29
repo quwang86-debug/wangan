@@ -23,7 +23,7 @@ import { RouterView } from "vue-router";
   background: #e9edf3;
 }
 
-/* 纯移动端：以设计稿 393×852 为基准，居中呈现 */
+/* 桌面：393×852 手机壳预览 */
 .phone-shell {
   position: relative;
   width: 100%;
@@ -33,6 +33,25 @@ import { RouterView } from "vue-router";
   margin: 0 auto;
   background: var(--color-bg);
   overflow: hidden;
+}
+
+@media (max-width: 479px) {
+  .app-stage {
+    align-items: stretch;
+    justify-content: stretch;
+    min-height: 100dvh;
+    height: 100dvh;
+    background: var(--color-brand);
+  }
+
+  .phone-shell {
+    max-width: none;
+    width: 100%;
+    height: 100dvh;
+    min-height: 100dvh;
+    margin: 0;
+    background: transparent;
+  }
 }
 
 @media (min-width: 480px) {

@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import BackgroundCarousel from "@/components/base/BackgroundCarousel.vue";
+import { VERIFY_CAROUSEL_SLIDES, verifyCarouselSrc } from "@/data/verifyCarousel";
 import { useStudentStore } from "@/stores/student";
 import { useStepper } from "@/composables/useStepper";
 import { assetUrl } from "@/utils/asset";
+
+const verifyBgSlides = VERIFY_CAROUSEL_SLIDES.map(verifyCarouselSrc);
+
+/** 暂时隐藏其余原设计稿装饰层；头部 logo + 圆点单独控制 */
+const showLegacyDecor = false;
+const showBrandHeader = true;
 
 const store = useStudentStore();
 const { next } = useStepper();
@@ -21,28 +29,77 @@ function onVerify() {
 <template>
   <!-- 设计稿基准画板 393×852，所有元素按设计稿坐标 1:1 绝对定位 -->
   <div class="verify-stage">
-    <!-- z1 全屏蓝底 #0050B5 -->
-    <div class="bg-fill" />
+    <!-- z1 校园轮播背景 -->
+    <BackgroundCarousel
+      class="bg-carousel"
+      :slides="verifyBgSlides"
+      effect="ken-burns-drift"
+      :interval="9000"
+      :fade-ms="1200"
+    />
+    <div v-if="showLegacyDecor" class="bg-tint" aria-hidden="true" />
 
     <!-- z2 二进制装饰文本 @(19,88) 382×722 -->
-    <p class="binary-text" aria-hidden="true">
+    <p v-if="showLegacyDecor" class="binary-text" aria-hidden="true">
       01101010 10011100 00110111 11000101 10100011 000111010 10 1 010 01 10 1010 0 001100 1010 11100100
       01011001 10001110 01110001 11010100 00101110 10110101 01001011 11110011 00111000 10010110 01100111 000
       001 1010 001100 0 100 001 001100 11001001 00001101 10111010 01010010 11101100
     </p>
 
     <!-- z3 暖色渐变遮罩 @(0,120) 393×721，填充不透明度 0.6 -->
-    <div class="warm-overlay" />
+    <div v-if="showLegacyDecor" class="warm-overlay" />
 
-    <!-- z4 头部：白 logo 占位 + 渐隐圆 -->
-    <!-- z4 头部白色 logo @ (11,41) 213×46 -->
+    <!-- z4 头部 logo + 渐隐圆（设计稿 logo2 @(23,41)） -->
     <img
+      v-if="showBrandHeader"
       class="brand-logo"
-      :src="assetUrl('assets/img/logo-white.png')"
+      :src="assetUrl('assets/img/verify-header-logo.png')"
       alt="网络空间安全学院"
     />
-    <span class="deco-circle deco-circle-1" />
-    <span class="deco-circle deco-circle-2" />
+    <!-- 圆形1 @(312,53) 22×22 · from{0,0.5}→to{1,0.5} · #FFF3D4(α0)→#0050B5 -->
+    <svg
+      v-if="showBrandHeader"
+      class="deco-circle deco-circle-1"
+      viewBox="0 0 22 22"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient
+          id="verify-deco-grad-1"
+          x1="0"
+          y1="11"
+          x2="22"
+          y2="11"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stop-color="#FFF3D4" stop-opacity="0" />
+          <stop offset="1" stop-color="#0050B5" />
+        </linearGradient>
+      </defs>
+      <circle cx="11" cy="11" r="11" fill="url(#verify-deco-grad-1)" />
+    </svg>
+    <!-- 圆形2 @(341,53) 22×22 · from{1,0.5}→to{0,0.5} · #0050B5→#FFF3D4(α0) -->
+    <svg
+      v-if="showBrandHeader"
+      class="deco-circle deco-circle-2"
+      viewBox="0 0 22 22"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient
+          id="verify-deco-grad-2"
+          x1="22"
+          y1="11"
+          x2="0"
+          y2="11"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0" stop-color="#0050B5" />
+          <stop offset="1" stop-color="#FFF3D4" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+      <circle cx="11" cy="11" r="11" fill="url(#verify-deco-grad-2)" />
+    </svg>
 
     <!-- z5 状态栏 -->
     <span class="status-time">9:41</span>
@@ -99,10 +156,15 @@ function onVerify() {
     <button class="submit-btn" type="button" @click="onVerify">去认证</button>
 
     <!-- z9 底部装饰图 @(-53,660) 446×192 -->
-    <img class="verify-deco" :src="assetUrl('assets/img/verify-deco.png')" alt="" />
+    <img
+      v-if="showLegacyDecor"
+      class="verify-deco"
+      :src="assetUrl('assets/img/verify-deco.png')"
+      alt=""
+    />
 
     <!-- z10 Hello new student @(166,593) -->
-    <p class="hello-text">Hello<br />new student</p>
+    <p v-if="showLegacyDecor" class="hello-text">Hello<br />new student</p>
   </div>
 </template>
 
@@ -114,18 +176,24 @@ function onVerify() {
   height: var(--design-height);
   margin: 0 auto;
   overflow: hidden;
-  background: #0050b5;
+  background: #0a1628;
 }
 
-/* z1 全屏蓝底 */
-.bg-fill {
+/* z1 轮播背景 */
+.bg-carousel {
+  z-index: 0;
+}
+
+/* 轻量品牌蓝叠色，保留校园图可见度 */
+.bg-tint {
   position: absolute;
   left: 0;
   top: 0;
   width: 393px;
   height: 852px;
-  background: #0050b5;
+  background: rgba(0, 80, 181, 0.18);
   z-index: 1;
+  pointer-events: none;
 }
 
 /* z2 二进制装饰文本：文源宋体 Light 18px，颜色 alpha 0.15，字距 15px */
@@ -161,36 +229,36 @@ function onVerify() {
   inset: 0;
   /* from{0.54198,0.96417}->to{0.54198,0.03028} = 底→顶 */
   background: linear-gradient(to top, #dbd5c5, rgba(204, 204, 204, 0));
-  opacity: 0.6;
+  opacity: 0.45;
 }
 
-/* z4 头部白色 logo @ (11,41) 213×46 */
+/* z4 头部 logo @ (23,41) 199×40 */
 .brand-logo {
   position: absolute;
-  left: 11px;
+  left: 23px;
   top: 41px;
-  width: 213px;
-  height: 46px;
+  width: 199px;
+  height: 40px;
   object-fit: contain;
   object-position: left center;
-  z-index: 4;
+  z-index: 5;
 }
 
-/* 顶部右侧两个水平渐隐圆 22×22 @ (311,53)(340,53) */
+/* logo2 内渐隐圆：圆形1 @(312,53) · 圆形2 @(341,53) · 各 22×22 */
 .deco-circle {
   position: absolute;
   top: 53px;
   width: 22px;
   height: 22px;
-  border-radius: 50%;
-  background: linear-gradient(to left, #fff3d4, rgba(255, 243, 212, 0));
-  z-index: 4;
+  pointer-events: none;
 }
 .deco-circle-1 {
-  left: 311px;
+  left: 312px;
+  z-index: 3;
 }
 .deco-circle-2 {
-  left: 340px;
+  left: 341px;
+  z-index: 4;
 }
 
 /* z5 状态栏 */
@@ -242,7 +310,7 @@ function onVerify() {
   font-weight: 400;
   font-size: 32px;
   line-height: 39px;
-  color: #fff;
+  color: #0a4ea1;
   z-index: 6;
 }
 
@@ -255,10 +323,10 @@ function onVerify() {
   height: 217px;
   border: 1px solid #fff;
   border-radius: 23px;
-  /* 设计稿渐变轴 from{y=1.51306}(#FFFFFA) -> to{y=0}(透明)，#FFFFFA 停止点在卡片底边之外。
-     映射到 CSS「to top」：底边=0%、顶边=100%，#FFFFFA 落在 -51.3%，
-     使卡片底边实际只有约 66% 不透明度（而非纯白），与设计稿一致。 */
-  background: linear-gradient(to top, #fffffa -51.3%, rgba(204, 204, 204, 0) 100%);
+  /* 设计稿渐变轴 from{y=1.51306}(#5483BC) -> to{y=0}(透明)，#5483BC 停止点在卡片底边之外。
+     映射到 CSS「to top」：底边=0%、顶边=100%，#5483BC 落在 -51.3%，
+     使卡片底边实际只有约 66% 不透明度（而非纯蓝），与设计稿一致。 */
+  background: linear-gradient(to top, #5483bc -51.3%, rgba(204, 204, 204, 0) 100%);
   z-index: 7;
 }
 
@@ -271,7 +339,7 @@ function onVerify() {
   font-weight: 400;
   font-size: 14px;
   line-height: 17px;
-  color: #fff;
+  color: #0a4ea1;
 }
 .field-label-name {
   top: 24px;
@@ -309,7 +377,8 @@ function onVerify() {
   top: 142px;
 }
 
-/* z8 去认证按钮 @(118,544) 158×34 */
+/* z8 去认证按钮 @(118,544) 158×34
+   渐变 from{y=-0.86275}(#FFF3D4) → to{y=1.54902}(#0050B5)，顶暖底蓝 */
 .submit-btn {
   position: absolute;
   left: 118px;
@@ -318,12 +387,11 @@ function onVerify() {
   height: 34px;
   padding: 0;
   border: 0;
-  /* 设计稿按钮为胶囊形（路径左右端为半圆，半径=高度一半=17px） */
   border-radius: 17px;
-  background: #0a4ea1;
+  background: transparent;
   text-align: center;
-  font-family: var(--font-button);
-  font-weight: 500;
+  font-family: var(--font-title);
+  font-weight: 400;
   font-size: 16px;
   line-height: 34px;
   letter-spacing: 2px;
@@ -333,7 +401,15 @@ function onVerify() {
   user-select: none;
   z-index: 8;
 }
-.submit-btn:active {
+.submit-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(to bottom, #fff3d4 -86.3%, #0050b5 154.9%);
+  z-index: -1;
+}
+.submit-btn:active::before {
   opacity: 0.85;
 }
 

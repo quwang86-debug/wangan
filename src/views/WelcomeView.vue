@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DesignStage from "@/components/base/DesignStage.vue";
 import { storeToRefs } from "pinia";
 import { useStudentStore } from "@/stores/student";
 import { useStepper } from "@/composables/useStepper";
@@ -9,8 +10,9 @@ const { next } = useStepper();
 </script>
 
 <template>
-  <!-- 设计稿基准画板 393×852，所有元素按设计稿坐标 1:1 绝对定位 -->
-  <div class="welcome-stage">
+  <DesignStage class="welcome-viewport">
+    <!-- 设计稿基准画板 393×852，所有元素按设计稿坐标 1:1 绝对定位 -->
+    <div class="welcome-stage">
     <!-- z2 卡片（暖纸→半透明白→蓝 渐变，圆角 15） -->
     <div class="card" />
 
@@ -47,44 +49,20 @@ const { next } = useStepper();
     />
     <span class="deco-circle deco-circle-1" />
     <span class="deco-circle deco-circle-2" />
-
-    <!-- 状态栏 -->
-    <span class="status-time">9:41</span>
-    <span class="status-icons">
-      <!-- 信号 17×11 @ (303,18) -->
-      <svg class="ico-cellular" viewBox="0 0 17 11" fill="#fff" aria-hidden="true">
-        <rect x="0" y="7" width="3" height="4" rx="0.5" />
-        <rect x="4.5" y="4" width="3" height="7" rx="0.5" />
-        <rect x="9" y="2" width="3" height="9" rx="0.5" />
-        <rect x="14" y="0" width="3" height="11" rx="0.5" />
-      </svg>
-      <!-- Wifi 15×11 @ (325,17) -->
-      <svg class="ico-wifi" viewBox="0 0 15 11" fill="#fff" aria-hidden="true">
-        <path
-          d="M7.5 0C11 0 13.9 1.2 15 2.3l-1.5 1.6C12.6 3 10.2 2.1 7.5 2.1S2.4 3 1.5 3.9L0 2.3C1.1 1.2 4 0 7.5 0Z"
-        />
-        <path
-          d="M7.5 4.2c2.1 0 4 .8 4.8 1.6L10.8 7.4C10.2 6.8 9 6.3 7.5 6.3S4.8 6.8 4.2 7.4L2.7 5.8C3.5 5 5.4 4.2 7.5 4.2Z"
-        />
-        <path d="M7.5 8.2c.9 0 1.7.4 2.1.9L7.5 11 5.4 9.1c.4-.5 1.2-.9 2.1-.9Z" />
-      </svg>
-      <!-- 电量 24×11 @ (345,17) -->
-      <svg class="ico-battery" viewBox="0 0 24 11" aria-hidden="true">
-        <rect x="0.5" y="0.5" width="21" height="10" rx="2.5" fill="none" stroke="#fff" opacity="0.35" />
-        <rect x="2" y="2" width="18" height="7" rx="1.5" fill="#fff" />
-        <rect x="23" y="4" width="1" height="4" rx="0.5" fill="#fff" opacity="0.4" />
-      </svg>
-    </span>
-  </div>
+    </div>
+  </DesignStage>
 </template>
 
 <style scoped>
+.welcome-viewport {
+  background: var(--color-brand);
+}
+
 /* 画板：393×852，蓝底铺满（对应设计稿全屏蓝色路径 #0050B5） */
 .welcome-stage {
   position: relative;
   width: var(--design-width);
   height: var(--design-height);
-  margin: 0 auto;
   background: var(--color-brand);
   overflow: hidden;
 }
@@ -260,42 +238,5 @@ const { next } = useStepper();
 }
 .deco-circle-2 {
   left: 340px;
-}
-
-/* 状态栏 */
-.status-time {
-  position: absolute;
-  left: 18px;
-  top: 12px;
-  width: 54px;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 21px;
-  letter-spacing: -0.28px;
-  color: #fff;
-  z-index: 11;
-}
-.status-icons {
-  position: absolute;
-  right: 24px;
-  top: 17px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 11;
-}
-.ico-cellular {
-  width: 17px;
-  height: 11px;
-}
-.ico-wifi {
-  width: 15px;
-  height: 11px;
-}
-.ico-battery {
-  width: 24px;
-  height: 11px;
 }
 </style>

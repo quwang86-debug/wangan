@@ -26,6 +26,19 @@ body {
   -moz-osx-font-smoothing: auto;
 }
 
+@media (max-width: 479px) {
+  html,
+  body,
+  #app {
+    overflow: hidden;
+    height: 100dvh;
+  }
+
+  body {
+    background: var(--color-brand);
+  }
+}
+
 img {
   display: block;
   /* 不设 max-width:100%：本应用为固定 393×852 绝对布局，
