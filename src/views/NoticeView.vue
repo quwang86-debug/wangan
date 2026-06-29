@@ -243,29 +243,29 @@ const noticeStudentName = computed(() => {
   top: 51.49%;
 }
 
-/* *长按保存 @(280,628)，右对齐 */
+/* *长按保存：设计稿 @(280,628)，相对通知书图 @(18,138) => 舞台内 @(262,490) */
 .save-tip {
   position: absolute;
-  right: -7px;
-  bottom: clamp(66px, 8.7vh, 74px);
+  left: 248px;
+  top: 485px;
   margin: 0;
   width: 102px;
-  max-width: 100%;
-  font-family: var(--font-mono);
+  font-family: "Founder", "FangSong", "STFangsong", var(--font-serif);
   font-weight: 400;
   font-size: 9px;
   line-height: 21px;
   letter-spacing: 0;
   color: #fff;
-  text-align: left;
+  text-align: right;
   pointer-events: none;
+  z-index: 6;
 }
 
 /* 按钮 @(25,693)(228,693) 154×30，间距 49px */
 .action-bar {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 7px;
+  right: -7px;
   bottom: 0;
   display: flex;
   align-items: center;
@@ -332,10 +332,6 @@ const noticeStudentName = computed(() => {
 
   .notice-paper-wrap {
     max-width: min(357px, calc((100dvh - 215px) * 0.707));
-  }
-
-  .save-tip {
-    bottom: clamp(58px, 8vh, 66px);
   }
 }
 </style>

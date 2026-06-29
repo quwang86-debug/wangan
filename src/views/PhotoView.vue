@@ -11,21 +11,58 @@ const { name, photoSource } = storeToRefs(store);
 const { compose } = useCanvasMerge();
 
 const fileInput = ref<HTMLInputElement | null>(null);
+const photoFrame = ref<HTMLElement | null>(null);
 const busy = ref(false);
 const message = ref("");
+const cropScale = ref(1);
+const cropX = ref(0);
+const cropY = ref(0);
+const photoRatio = ref<number | null>(null);
 
-/** 避免「新同学同学」；已填姓名时去掉末尾重复的「同学」 */
-const subtitleLabel = computed(() => {
+const MIN_CROP_SCALE = 1;
+const MAX_CROP_SCALE = 3;
+const PHOTO_WINDOW_RATIO = 1375 / 1369;
+const activePointers = new Map<number, PointerEvent>();
+
+let dragStartX = 0;
+let dragStartY = 0;
+let dragOriginX = 0;
+let dragOriginY = 0;
+let pinchStartDistance = 0;
+let pinchStartScale = 1;
+
+const verifiedStudentName = computed(() => {
   const n = name.value.trim();
-  let label = !n || n === "新同学" ? "X" : n;
+  return n && n !== "新同学" ? n : "新同学";
+});
+
+/** 使用核验页填入的姓名；若姓名本身带“同学”，避免重复显示。 */
+const subtitleLabel = computed(() => {
+  let label = verifiedStudentName.value;
   if (label.endsWith("同学")) label = label.slice(0, -2);
   return `${label}同学·2026级新生`;
 });
+
+const cropTransform = computed(() => ({
+  scale: cropScale.value,
+  x: cropX.value,
+  y: cropY.value,
+}));
+
+const photoStyle = computed(() => ({
+  "--photo-scale": cropScale.value.toString(),
+  "--photo-x": `${cropX.value * 100}%`,
+  "--photo-y": `${cropY.value * 100}%`,
+}));
 
 async function onFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0];
   if (!file) return;
   photoSource.value = await fileToDataUrl(file);
+  photoRatio.value = null;
+  resetCrop();
+  activePointers.clear();
+  (e.target as HTMLInputElement).value = "";
 }
 
 async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
@@ -35,7 +72,7 @@ async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
   }
   busy.value = true;
   try {
-    const dataUrl = await compose(photoSource.value);
+    const dataUrl = await compose(photoSource.value, cropTransform.value);
     await fn(dataUrl);
   } finally {
     busy.value = false;
@@ -43,16 +80,116 @@ async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
 }
 
 function onDownload() {
-  void withComposite((dataUrl) => downloadDataUrl(dataUrl, `网安合影-${name.value}.png`));
+  void withComposite((dataUrl) => downloadDataUrl(dataUrl, `网安合影-${verifiedStudentName.value}.png`));
 }
 
 function onShare() {
   void withComposite(async (dataUrl) => {
-    const r = await shareImage(dataUrl, `网安合影-${name.value}.png`, "我在网安等你");
+    const r = await shareImage(dataUrl, `网安合影-${verifiedStudentName.value}.png`, "我在网安等你");
     message.value = r === "shared" ? "已调起分享" : "已保存图片，可发布到朋友圈/小红书";
   });
 }
 
+function onPhotoClick() {
+  if (!photoSource.value) fileInput.value?.click();
+}
+
+function onPhotoLoad(e: Event) {
+  const img = e.target as HTMLImageElement;
+  photoRatio.value = img.naturalWidth / img.naturalHeight;
+  clampCrop();
+}
+
+function resetCrop() {
+  cropScale.value = 1;
+  cropX.value = 0;
+  cropY.value = 0;
+}
+
+function getCropBounds() {
+  const imageRatio = photoRatio.value ?? PHOTO_WINDOW_RATIO;
+  const baseWidth = imageRatio > PHOTO_WINDOW_RATIO ? imageRatio / PHOTO_WINDOW_RATIO : 1;
+  const baseHeight = imageRatio > PHOTO_WINDOW_RATIO ? 1 : PHOTO_WINDOW_RATIO / imageRatio;
+  return {
+    x: Math.max(0, (baseWidth * cropScale.value - 1) / 2),
+    y: Math.max(0, (baseHeight * cropScale.value - 1) / 2),
+  };
+}
+
+function clampCrop() {
+  cropScale.value = Math.min(MAX_CROP_SCALE, Math.max(MIN_CROP_SCALE, cropScale.value));
+  const bounds = getCropBounds();
+  cropX.value = Math.min(bounds.x, Math.max(-bounds.x, cropX.value));
+  cropY.value = Math.min(bounds.y, Math.max(-bounds.y, cropY.value));
+}
+
+function setCropScale(value: number) {
+  cropScale.value = value;
+  clampCrop();
+}
+
+function adjustZoom(delta: number) {
+  setCropScale(Number((cropScale.value + delta).toFixed(2)));
+}
+
+function distance(a: PointerEvent, b: PointerEvent) {
+  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+}
+
+function startSinglePointerDrag(pointer: PointerEvent) {
+  dragStartX = pointer.clientX;
+  dragStartY = pointer.clientY;
+  dragOriginX = cropX.value;
+  dragOriginY = cropY.value;
+}
+
+function onCropPointerDown(e: PointerEvent) {
+  if (!photoSource.value) return;
+  e.preventDefault();
+  photoFrame.value?.setPointerCapture(e.pointerId);
+  activePointers.set(e.pointerId, e);
+  if (activePointers.size === 1) {
+    startSinglePointerDrag(e);
+  } else if (activePointers.size === 2) {
+    const [a, b] = [...activePointers.values()];
+    pinchStartDistance = distance(a, b);
+    pinchStartScale = cropScale.value;
+  }
+}
+
+function onCropPointerMove(e: PointerEvent) {
+  if (!photoSource.value || !activePointers.has(e.pointerId)) return;
+  e.preventDefault();
+  activePointers.set(e.pointerId, e);
+  if (activePointers.size >= 2) {
+    const [a, b] = [...activePointers.values()];
+    if (pinchStartDistance > 0) {
+      setCropScale(pinchStartScale * (distance(a, b) / pinchStartDistance));
+    }
+    return;
+  }
+
+  const frame = photoFrame.value;
+  if (!frame) return;
+  cropX.value = dragOriginX + (e.clientX - dragStartX) / frame.clientWidth;
+  cropY.value = dragOriginY + (e.clientY - dragStartY) / frame.clientHeight;
+  clampCrop();
+}
+
+function onCropPointerEnd(e: PointerEvent) {
+  if (!activePointers.has(e.pointerId)) return;
+  activePointers.delete(e.pointerId);
+  photoFrame.value?.releasePointerCapture(e.pointerId);
+  if (activePointers.size === 1) {
+    startSinglePointerDrag([...activePointers.values()][0]);
+  }
+}
+
+function onCropWheel(e: WheelEvent) {
+  if (!photoSource.value) return;
+  e.preventDefault();
+  adjustZoom(e.deltaY > 0 ? -0.08 : 0.08);
+}
 </script>
 
 <template>
@@ -90,18 +227,53 @@ function onShare() {
           <div class="polaroid">
             <div class="polaroid-art">
               <div
+                ref="photoFrame"
                 class="polaroid-photo"
                 role="button"
                 tabindex="0"
                 aria-label="上传照片"
-                @click="fileInput?.click()"
+                @click="onPhotoClick"
                 @keydown.enter="fileInput?.click()"
+                @pointerdown="onCropPointerDown"
+                @pointermove="onCropPointerMove"
+                @pointerup="onCropPointerEnd"
+                @pointercancel="onCropPointerEnd"
+                @wheel="onCropWheel"
               >
-                <img v-if="photoSource" :src="photoSource" alt="入学合影" />
+                <img
+                  v-if="photoSource"
+                  :src="photoSource"
+                  :style="photoStyle"
+                  alt="入学合影"
+                  @load="onPhotoLoad"
+                />
               </div>
               <img class="polaroid-frame" :src="assetUrl('assets/img/polaroid.png')" alt="" />
             </div>
           </div>
+        </div>
+      </div>
+
+      <div v-if="photoSource" class="crop-panel" aria-label="照片裁剪调整">
+        <p class="crop-hint">拖动调整位置，双指或滑块缩放</p>
+        <div class="crop-controls">
+          <button class="crop-btn" type="button" aria-label="缩小照片" @click="adjustZoom(-0.1)">
+            -
+          </button>
+          <input
+            v-model.number="cropScale"
+            class="crop-range"
+            type="range"
+            :min="MIN_CROP_SCALE"
+            :max="MAX_CROP_SCALE"
+            step="0.01"
+            aria-label="照片缩放"
+            @input="clampCrop"
+          />
+          <button class="crop-btn" type="button" aria-label="放大照片" @click="adjustZoom(0.1)">
+            +
+          </button>
+          <button class="change-photo-btn" type="button" @click="fileInput?.click()">更换照片</button>
         </div>
       </div>
 
@@ -114,7 +286,9 @@ function onShare() {
         </button>
       </div>
 
-      <p v-if="message" class="toast">{{ message }}</p>
+      <p v-if="message" class="toast" :class="{ 'toast-with-photo': photoSource }">
+        {{ message }}
+      </p>
     </div>
 
     <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileChange" />
@@ -313,14 +487,16 @@ function onShare() {
 
 .polaroid-photo {
   position: absolute;
-  left: calc(209 / 779 * 100%);
-  top: calc(37 / 550 * 100%);
-  width: calc(376 / 779 * 100%);
-  height: calc(463 / 550 * 100%);
+  left: calc(1095 / 3508 * 100%);
+  top: calc(383 / 2480 * 100%);
+  width: calc(1375 / 3508 * 100%);
+  height: calc(1369 / 2480 * 100%);
   overflow: hidden;
   background: transparent;
   cursor: pointer;
   pointer-events: auto;
+  touch-action: none;
+  user-select: none;
   z-index: 1;
 }
 
@@ -330,6 +506,9 @@ function onShare() {
   object-fit: cover;
   display: block;
   pointer-events: none;
+  transform: translate(var(--photo-x, 0), var(--photo-y, 0)) scale(var(--photo-scale, 1));
+  transform-origin: center;
+  user-select: none;
 }
 
 .polaroid-frame {
@@ -342,15 +521,76 @@ function onShare() {
   z-index: 2;
 }
 
+.crop-panel {
+  position: absolute;
+  left: 35px;
+  right: 35px;
+  top: 652px;
+  margin: 0;
+  z-index: 21;
+  pointer-events: auto;
+}
+
+.crop-hint {
+  margin: 0 0 4px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 16px;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.crop-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crop-btn,
+.change-photo-btn {
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-family: var(--font-mono);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.crop-btn {
+  width: 26px;
+  height: 26px;
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.change-photo-btn {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 11px;
+  line-height: 26px;
+  white-space: nowrap;
+}
+
+.crop-range {
+  min-width: 0;
+  flex: 1;
+  accent-color: #fff3d4;
+}
+
 /* 底部按钮组 */
 .action-bar {
-  position: relative;
+  position: absolute;
+  left: 35px;
+  right: 35px;
+  top: 720px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: clamp(8px, 4vw, 16px);
-  margin: clamp(10px, 1.6vh, 14px) clamp(18px, 8.9vw, 35px) 0;
-  z-index: 20;
+  gap: 0;
+  margin: 0;
+  z-index: 22;
   pointer-events: auto;
 }
 
@@ -372,11 +612,11 @@ function onShare() {
 }
 
 .btn-download {
-  width: clamp(130px, 37.4vw, 147px);
-  height: clamp(32px, 9.2vw, 36px);
+  width: 147px;
+  height: 36px;
   border-radius: 18px;
-  font-size: clamp(12px, 3.6vw, 14px);
-  line-height: clamp(32px, 9.2vw, 36px);
+  font-size: 14px;
+  line-height: 36px;
 }
 
 .btn-download::before {
@@ -390,11 +630,12 @@ function onShare() {
 }
 
 .btn-share {
-  width: clamp(130px, 37.4vw, 147px);
-  height: clamp(31px, 8.9vw, 35px);
+  width: 147px;
+  height: 35px;
+  margin-top: 2px;
   border-radius: 17.5px;
-  font-size: clamp(11px, 3.3vw, 13px);
-  line-height: clamp(31px, 8.9vw, 35px);
+  font-size: 13px;
+  line-height: 35px;
 }
 
 .btn-share::before {
@@ -429,15 +670,22 @@ function onShare() {
 
 /* 提示信息 */
 .toast {
-  position: relative;
-  margin: clamp(8px, 1.2vh, 12px) clamp(18px, 9.2vw, 36px) 0;
+  position: absolute;
+  left: 35px;
+  right: 35px;
+  top: 690px;
+  margin: 0;
   text-align: center;
   font-family: var(--font-mono);
   font-size: 12px;
   line-height: 18px;
   color: rgba(255, 255, 255, 0.9);
-  z-index: 12;
+  z-index: 23;
   pointer-events: none;
+}
+
+.toast-with-photo {
+  top: 698px;
 }
 
 @media (max-height: 720px) {
@@ -466,8 +714,20 @@ function onShare() {
     width: min(calc(100% - 72px), 320px);
   }
 
+  .crop-panel {
+    top: calc(100dvh - 188px);
+  }
+
   .action-bar {
-    margin-top: 8px;
+    top: calc(100dvh - 120px);
+  }
+
+  .toast {
+    top: calc(100dvh - 148px);
+  }
+
+  .toast-with-photo {
+    top: calc(100dvh - 130px);
   }
 }
 

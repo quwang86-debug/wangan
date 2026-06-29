@@ -16,7 +16,7 @@ const idCard = ref("");
 
 function onVerify() {
   // TODO: 调用后端实名核验 /api/verify（见蓝本 §8）
-  store.setProfile({ name: name.value || "新同学", idCard: idCard.value });
+  store.setProfile({ name: name.value.trim() || "新同学", idCard: idCard.value });
   store.markVerified();
   next("verify");
 }
