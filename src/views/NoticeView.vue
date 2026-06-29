@@ -6,12 +6,11 @@ import { useStudentStore } from "@/stores/student";
 import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
-const { name } = storeToRefs(useStudentStore());
+const { name, studentNo } = storeToRefs(useStudentStore());
 
 const noticeImg = assetUrl("assets/img/notice-paper.jpg");
 const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
 
-const demoStudentNo = "202601001";
 const demoCollegeName = "网络空间安全学院";
 const demoMajorName = "网络空间安全";
 
@@ -48,7 +47,7 @@ const noticeStudentName = computed(() => {
       <div class="notice-paper-wrap">
         <img :src="noticeImg" alt="录取通知书" class="notice-paper" />
         <div class="notice-paper-fields" aria-hidden="true">
-          <span class="paper-field paper-field-student-no">{{ demoStudentNo }}</span>
+          <span class="paper-field paper-field-student-no">{{ studentNo }}</span>
           <span class="paper-field paper-field-student-name">{{ noticeStudentName }}</span>
           <span class="paper-field paper-field-college">{{ demoCollegeName }}</span>
           <span class="paper-field paper-field-major">{{ demoMajorName }}</span>

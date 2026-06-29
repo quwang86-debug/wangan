@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useStudentStore } from "@/stores/student";
 import { useCanvasMerge } from "@/composables/useCanvasMerge";
@@ -14,6 +14,36 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const photoFrame = ref<HTMLElement | null>(null);
 const busy = ref(false);
 const message = ref("");
+const UPLOAD_PROMPT = "请先上传或拍摄一张照片";
+
+let messageTimer: ReturnType<typeof setTimeout> | null = null;
+
+function clearMessageTimer() {
+  if (messageTimer) {
+    clearTimeout(messageTimer);
+    messageTimer = null;
+  }
+}
+
+function showMessage(text: string, autoHideMs?: number) {
+  clearMessageTimer();
+  message.value = text;
+  if (autoHideMs && autoHideMs > 0) {
+    messageTimer = setTimeout(() => {
+      if (message.value === text) message.value = "";
+      messageTimer = null;
+    }, autoHideMs);
+  }
+}
+
+watch(photoSource, (value) => {
+  if (value && message.value === UPLOAD_PROMPT) {
+    message.value = "";
+    clearMessageTimer();
+  }
+});
+
+onUnmounted(clearMessageTimer);
 const cropScale = ref(1);
 const cropX = ref(0);
 const cropY = ref(0);
@@ -67,7 +97,7 @@ async function onFileChange(e: Event) {
 
 async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
   if (!photoSource.value) {
-    message.value = "请先上传或拍摄一张照片";
+    showMessage(UPLOAD_PROMPT, 3000);
     return;
   }
   busy.value = true;
@@ -83,10 +113,34 @@ function onDownload() {
   void withComposite((dataUrl) => downloadDataUrl(dataUrl, `网安合影-${verifiedStudentName.value}.png`));
 }
 
+function isWeChatBrowser() {
+  return /micromessenger/i.test(navigator.userAgent);
+}
+
+function isMobileBrowser() {
+  return /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+}
+
+function getShareFallbackMessage() {
+  if (isWeChatBrowser()) {
+    return "微信内无法直接发朋友圈图片，已尝试保存合影，请从相册发布";
+  }
+  if (isMobileBrowser()) {
+    return "已保存合影，请打开微信/小红书从相册选择发布";
+  }
+  return "已下载合影，请发送到手机后发布到朋友圈/小红书";
+}
+
 function onShare() {
   void withComposite(async (dataUrl) => {
     const r = await shareImage(dataUrl, `网安合影-${verifiedStudentName.value}.png`, "我在网安等你");
-    message.value = r === "shared" ? "已调起分享" : "已保存图片，可发布到朋友圈/小红书";
+    const text =
+      r === "shared"
+        ? "已调起系统分享，请选择微信/小红书等应用"
+        : r === "cancelled"
+          ? "已取消分享"
+          : getShareFallbackMessage();
+    showMessage(text, r === "cancelled" ? 2500 : 5000);
   });
 }
 

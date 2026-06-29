@@ -63,7 +63,9 @@ export function downloadDataUrl(dataUrl: string, filename: string) {
   a.remove();
 }
 
-/** 优先调用系统分享（含图片），不支持时回退为下载 */
+export type ShareImageResult = "shared" | "downloaded" | "cancelled";
+
+/** 优先调用系统分享（含图片），不支持或分享失败时回退为下载 */
 export async function shareImage(dataUrl: string, filename: string, text: string) {
   const blob = dataUrlToBlob(dataUrl);
   const file = new File([blob], filename, { type: blob.type });
@@ -72,8 +74,16 @@ export async function shareImage(dataUrl: string, filename: string, text: string
     share?: (data: ShareData) => Promise<void>;
   };
   if (nav.share && nav.canShare && nav.canShare({ files: [file] })) {
-    await nav.share({ files: [file], text });
-    return "shared" as const;
+    try {
+      await nav.share({ files: [file], text });
+      return "shared" as const;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return "cancelled" as const;
+      }
+      downloadDataUrl(dataUrl, filename);
+      return "downloaded" as const;
+    }
   }
   downloadDataUrl(dataUrl, filename);
   return "downloaded" as const;
