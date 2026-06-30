@@ -188,8 +188,8 @@ function onPhotoPicked() {
 }
 
 /*
- * 主舞台：设计稿 paper @(18,138) → 去状态栏后 top≈94
- * bottom 留 btn @(693)+30 + 页底边距 ≈ 129px
+ * 主舞台：设计稿 paper @(18,138) → stage 内 top 44px
+ * 通知书与按钮固定间距 50px（693−643），按钮下方留白给底部装饰
  */
 .notice-stage {
   position: absolute;
@@ -197,13 +197,19 @@ function onPhotoPicked() {
   right: clamp(18px, 4.6vw, 18px);
   top: clamp(88px, 11vh, 94px);
   bottom: max(clamp(100px, 12vh, 129px), env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: calc(44 / 852 * 100cqh);
   z-index: 5;
 }
 
 /* 通知书 @(18,138) 357×505 */
 .notice-paper-wrap {
   position: relative;
-  margin: 0 auto;
+  flex-shrink: 0;
+  align-self: center;
   width: 100%;
   max-width: 357px;
   aspect-ratio: 2480 / 3508;
@@ -246,12 +252,14 @@ function onPhotoPicked() {
   z-index: 6;
 }
 
-/* 按钮 @(25,693)(228,693) 154×30，间距 49px */
+/* 按钮 @(25,693)(228,693) 154×30，与通知书间距 50px */
 .action-bar {
-  position: absolute;
-  left: 7px;
-  right: -7px;
-  bottom: 0;
+  position: relative;
+  flex-shrink: 0;
+  align-self: stretch;
+  margin-top: calc(50 / 852 * 100cqh);
+  margin-left: 7px;
+  margin-right: -7px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -309,6 +317,7 @@ function onPhotoPicked() {
   .notice-stage {
     top: clamp(76px, 10vh, 88px);
     bottom: max(clamp(80px, 10vh, 100px), env(safe-area-inset-bottom, 0px));
+    padding-top: calc(32 / 852 * 100cqh);
   }
 
   .notice-bg-gradient {
@@ -317,6 +326,10 @@ function onPhotoPicked() {
 
   .notice-paper-wrap {
     max-width: min(357px, calc((100dvh - 215px) * 0.707));
+  }
+
+  .action-bar {
+    margin-top: calc(36 / 852 * 100cqh);
   }
 }
 </style>
