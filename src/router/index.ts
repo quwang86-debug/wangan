@@ -7,8 +7,9 @@ import PhotoView from "@/views/PhotoView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 
 /**
- * 流程式路由（移动端 6 步）：
- * 欢迎 → 核验 → 通知书 → 合影加载 → 合影 → 注册
+ * 流程式路由：
+ * 欢迎 → 核验 → 通知书 → 合影 → 注册
+ * photo-loading 为过渡页：仅通知书「生成合影」选图后出现，不在主流程链中。
  *
  * 注意：此处使用「静态导入」而非懒加载 `() => import()`。
  * App.vue 用 <transition mode="out-in"> 包裹路由组件，
@@ -41,19 +42,19 @@ export const router = createRouter({
       path: "/photo-loading",
       name: "photo-loading",
       component: PhotoLoadingView,
-      meta: { step: 4, title: "合影加载" },
+      meta: { title: "合影加载" },
     },
     {
       path: "/photo",
       name: "photo",
       component: PhotoView,
-      meta: { step: 5, title: "入学合影" },
+      meta: { step: 4, title: "入学合影" },
     },
     {
       path: "/register",
       name: "register",
       component: RegisterView,
-      meta: { step: 6, title: "线上注册" },
+      meta: { step: 5, title: "线上注册" },
     },
   ],
   scrollBehavior() {

@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { useStepper } from "@/composables/useStepper";
+import { useRouter } from "vue-router";
 import { assetUrl } from "@/utils/asset";
 
-const { goto } = useStepper();
+const router = useRouter();
 let timer: number | undefined;
 
 onMounted(() => {
-  timer = window.setTimeout(() => goto("photo"), 2200);
+  // replace：加载完成后替换当前历史记录，从合影页返回时直达通知书，不再经过加载页
+  timer = window.setTimeout(() => router.replace({ name: "photo" }), 2200);
 });
 onUnmounted(() => window.clearTimeout(timer));
 </script>

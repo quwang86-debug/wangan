@@ -1,8 +1,10 @@
 import { useRouter } from "vue-router";
 
-/** 流程跳转辅助（按蓝本 §6 的页面顺序） */
-const ORDER = ["welcome", "verify", "notice", "photo-loading", "photo", "register"] as const;
-type StepName = (typeof ORDER)[number];
+/** 主流程步骤（不含过渡页 photo-loading） */
+const ORDER = ["welcome", "verify", "notice", "photo", "register"] as const;
+type FlowStep = (typeof ORDER)[number];
+/** 含合影加载过渡页（仅通知书选图后进入，不参与 next 链） */
+type StepName = FlowStep | "photo-loading";
 
 export function useStepper() {
   const router = useRouter();
@@ -11,7 +13,7 @@ export function useStepper() {
     router.push({ name });
   }
 
-  function next(current: StepName) {
+  function next(current: FlowStep) {
     const i = ORDER.indexOf(current);
     if (i >= 0 && i < ORDER.length - 1) {
       router.push({ name: ORDER[i + 1] });
