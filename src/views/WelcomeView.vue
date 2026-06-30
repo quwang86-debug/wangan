@@ -112,7 +112,7 @@ const { next } = useStepper();
   z-index: 6;
 }
 
-/* 卡片随视口高度伸缩，保持左右设计边距 */
+/* 卡片随视口高度伸缩；内部元素相对卡片容器定位，避免与正文重叠 */
 .welcome-card {
   position: absolute;
   left: clamp(18px, 4.8vw, 19px);
@@ -123,33 +123,36 @@ const { next } = useStepper();
   border-radius: 15px;
   background: var(--gradient-welcome-card);
   overflow: hidden;
+  container-type: size;
+  container-name: welcome-card;
 }
 
-/* 分隔线与标签 */
+/* 分隔线与标签 — 设计稿卡片 356×708 内坐标（组 @(26,18)，线 y+8） */
 .divider-line {
   position: absolute;
-  top: clamp(18px, 2.7vh, 26px);
-  width: min(29.3vw, 115px);
-  height: 2px;
+  top: calc(26 / 708 * 100cqh);
+  width: calc(115 / 356 * 100cqw);
+  height: max(2px, calc(2 / 708 * 100cqh));
+  display: block;
   background: var(--color-line);
   z-index: 4;
 }
 .divider-left {
-  left: clamp(26px, 6.6vw, 45px);
+  left: calc(26 / 356 * 100cqw);
 }
 .divider-right {
-  right: clamp(26px, 6.6vw, 45px);
+  left: calc(217 / 356 * 100cqw);
 }
 .divider-label {
   position: absolute;
   left: 0;
   right: 0;
-  top: clamp(10px, 1.8vh, 18px);
+  top: calc(18 / 708 * 100cqh);
   text-align: center;
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: 13px;
-  line-height: 16px;
+  font-size: calc(13 / 356 * 100cqw);
+  line-height: calc(16 / 708 * 100cqh);
   color: var(--color-brand);
   z-index: 4;
 }

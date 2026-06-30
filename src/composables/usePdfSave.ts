@@ -1,25 +1,70 @@
-import { loadImage, downloadDataUrl } from "@/utils/image";
+import { loadImage } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
 
-/**
- * 通知书姓名套打层（相对证书图的百分比），与 NoticeView 预览保持一致。
- * 可对照设计稿精调。
- */
-export const NOTICE_NAME_POS = {
-  top: 0.398,
-  left: 0.225,
-  fontRatio: 0.042, // 字号相对证书图宽度
+/** 套打字段相对通知书原图 (2480×3508) 的位置，与 NoticeView 预览一致 */
+export const NOTICE_PAPER_FIELDS = {
+  studentNo: {
+    left: 0.6863,
+    top: 0.383,
+    fontRatio: 0.02521,
+    fontFamily: '"SourceHanSansCN", "Source Han Sans SC", sans-serif',
+    align: "left" as CanvasTextAlign,
+  },
+  studentName: {
+    left: 0.2369,
+    top: 0.4099,
+    fontRatio: 0.033613,
+    fontFamily: '"WenYuanSerifSC", "FangSong", "STFangsong", serif',
+    align: "center" as CanvasTextAlign,
+  },
+  college: {
+    left: 0.6363,
+    top: 0.4812,
+    fontRatio: 0.033613,
+    fontFamily: '"WenYuanSerifSC", "FangSong", "STFangsong", serif',
+    align: "center" as CanvasTextAlign,
+  },
+  major: {
+    left: 0.4722,
+    top: 0.5149,
+    fontRatio: 0.033613,
+    fontFamily: '"WenYuanSerifSC", "FangSong", "STFangsong", serif',
+    align: "center" as CanvasTextAlign,
+  },
+} as const;
+
+export type NoticePaperOverlay = {
+  studentNo: string;
+  studentName: string;
+  college: string;
+  major: string;
 };
 
 const PAPER_SRC = assetUrl("assets/img/notice-paper.jpg");
 
+function drawPaperField(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  text: string,
+  field: (typeof NOTICE_PAPER_FIELDS)[keyof typeof NOTICE_PAPER_FIELDS],
+) {
+  if (!text) return;
+  const fontSize = width * field.fontRatio;
+  ctx.font = `400 ${fontSize}px ${field.fontFamily}`;
+  ctx.fillStyle = "#000";
+  ctx.textAlign = field.align;
+  ctx.textBaseline = "top";
+  ctx.fillText(text, field.left * width, field.top * height);
+}
+
 /**
- * 通知书保存：把姓名合成进证书图，导出可下载/长按保存的 PNG。
- * 详见 docs/落地蓝本.md §6.3。
+ * 通知书保存：背景图 + 套打字段合成 PNG，供展示与长按保存。
  */
 export function usePdfSave() {
-  /** 返回证书原图 dataURL（暂不套打姓名） */
-  async function compose(_name?: string): Promise<string> {
+  async function compose(overlay: NoticePaperOverlay): Promise<string> {
+    if (document.fonts?.ready) await document.fonts.ready;
+
     const paper = await loadImage(PAPER_SRC);
     const canvas = document.createElement("canvas");
     canvas.width = paper.naturalWidth;
@@ -28,13 +73,19 @@ export function usePdfSave() {
     if (!ctx) throw new Error("canvas 2d context 不可用");
 
     ctx.drawImage(paper, 0, 0);
-    return canvas.toDataURL("image/png");
+    drawPaperField(ctx, canvas.width, canvas.height, overlay.studentNo, NOTICE_PAPER_FIELDS.studentNo);
+    drawPaperField(
+      ctx,
+      canvas.width,
+      canvas.height,
+      overlay.studentName,
+      NOTICE_PAPER_FIELDS.studentName,
+    );
+    drawPaperField(ctx, canvas.width, canvas.height, overlay.college, NOTICE_PAPER_FIELDS.college);
+    drawPaperField(ctx, canvas.width, canvas.height, overlay.major, NOTICE_PAPER_FIELDS.major);
+
+    return canvas.toDataURL("image/jpeg", 0.92);
   }
 
-  async function save(name: string) {
-    const dataUrl = await compose(name);
-    downloadDataUrl(dataUrl, `录取通知书-${name}.png`);
-  }
-
-  return { compose, save };
+  return { compose };
 }

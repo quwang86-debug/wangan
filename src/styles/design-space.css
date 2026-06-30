@@ -1,0 +1,17 @@
+/**
+ * 设计稿统一坐标系
+ *
+ * phone-shell 作为 size 容器，页面内用 cqw/cqh 换算设计稿 px，
+ * PC 预览壳与移动端全屏壳按同一比例缩放，避免 vw/vh 相对浏览器视口导致偏差。
+ *
+ * 用法：
+ *   画板级（相对 phone-shell）→ calc(N / 393 * 100cqw)，calc(N / 852 * 100cqh)
+ *   卡片/区块级 → 在对应容器上设 container-type: size，再用该容器 cqw/cqh
+ *   例：欢迎页卡片 356×708 → calc(N / 356 * 100cqw)，calc(N / 708 * 100cqh)
+ *
+ * 全页 1:1 还原可选用 DesignStage 组件（393×852 固定舞台 + 移动端 scale）。
+ */
+.phone-shell {
+  container-type: size;
+  container-name: shell;
+}

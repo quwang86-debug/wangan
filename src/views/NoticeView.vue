@@ -1,17 +1,20 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useStepper } from "@/composables/useStepper";
+import { usePdfSave } from "@/composables/usePdfSave";
 import PhotoPickerInput from "@/components/base/PhotoPickerInput.vue";
 import { useStudentStore } from "@/stores/student";
 import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
+const { compose } = usePdfSave();
 const { name, studentNo } = storeToRefs(useStudentStore());
 const photoPickerRef = ref<InstanceType<typeof PhotoPickerInput> | null>(null);
 
 const noticeImg = assetUrl("assets/img/notice-paper.jpg");
 const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
+const noticeDisplayUrl = ref(noticeImg);
 
 const demoCollegeName = "网络空间安全学院";
 const demoMajorName = "网络空间安全";
@@ -19,6 +22,27 @@ const demoMajorName = "网络空间安全";
 const noticeStudentName = computed(() => {
   const value = name.value.trim();
   return value && value !== "新同学" ? value : "网小安";
+});
+
+async function refreshComposedNotice() {
+  try {
+    noticeDisplayUrl.value = await compose({
+      studentNo: studentNo.value,
+      studentName: noticeStudentName.value,
+      college: demoCollegeName,
+      major: demoMajorName,
+    });
+  } catch {
+    noticeDisplayUrl.value = noticeImg;
+  }
+}
+
+onMounted(() => {
+  void refreshComposedNotice();
+});
+
+watch([studentNo, noticeStudentName], () => {
+  void refreshComposedNotice();
 });
 
 function onGeneratePhoto() {
@@ -55,13 +79,7 @@ function onPhotoPicked() {
     <!-- 主内容区：对应欢迎页 welcome-card，子元素区内绝对定位 -->
     <section class="notice-stage" aria-label="录取通知书">
       <div class="notice-paper-wrap">
-        <img :src="noticeImg" alt="录取通知书" class="notice-paper" />
-        <div class="notice-paper-fields" aria-hidden="true">
-          <span class="paper-field paper-field-student-no">{{ studentNo }}</span>
-          <span class="paper-field paper-field-student-name">{{ noticeStudentName }}</span>
-          <span class="paper-field paper-field-college">{{ demoCollegeName }}</span>
-          <span class="paper-field paper-field-major">{{ demoMajorName }}</span>
-        </div>
+        <img :src="noticeDisplayUrl" alt="录取通知书" class="notice-paper" />
       </div>
 
       <p class="save-tip">*长按保存通知书</p>
@@ -188,7 +206,6 @@ function onPhotoPicked() {
   width: 100%;
   max-width: 357px;
   aspect-ratio: 2480 / 3508;
-  container-type: inline-size;
   overflow: hidden;
   pointer-events: none;
 }
@@ -202,56 +219,6 @@ function onPhotoPicked() {
   -webkit-touch-callout: default;
   user-select: none;
   pointer-events: auto;
-}
-
-.notice-paper-fields {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.paper-field {
-  position: absolute;
-  font-family: "Founder", "FangSong", "STFangsong", var(--font-serif);
-  font-weight: 400;
-  font-size: calc(100cqw * 0.033613);
-  line-height: 1.1667;
-  color: #000;
-  white-space: nowrap;
-}
-
-/* 位置按通知书原图真实下划线 / 学号冒号后空白区域换算 */
-.paper-field-student-no {
-  left: 68.63%;
-  top: 38.10%;
-  font-family: "SourceHanSans-Regular", "Source Han Sans SC", var(--font-mono);
-  font-size: calc(100cqw * 0.02521);
-  line-height: 1.4444;
-  letter-spacing: 0;
-}
-
-/* 姓名 / 学院 / 专业：以各自下划线中心点为锚点 */
-.paper-field-student-name,
-.paper-field-college,
-.paper-field-major {
-  transform: translateX(-50%);
-  text-align: center;
-}
-
-.paper-field-student-name {
-  left: 23.69%;
-  top: 40.99%;
-}
-
-.paper-field-college {
-  left: 63.63%;
-  top: 48.12%;
-}
-
-.paper-field-major {
-  left: 47.22%;
-  top: 51.49%;
 }
 
 /* *长按保存：设计稿 @(280,628)，相对通知书图 @(18,138) => 舞台内 @(262,490) */
