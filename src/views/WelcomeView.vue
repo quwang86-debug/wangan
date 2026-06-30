@@ -160,9 +160,11 @@ const { next } = useStepper();
 .emblem {
   position: absolute;
   left: 50%;
-  top: clamp(52px, 7vh, 62px);
-  width: clamp(138px, 20vh, 170px);
-  height: clamp(138px, 20vh, 170px);
+  top: calc(62 / 708 * 100cqh);
+  width: calc(170 / 356 * 100cqw);
+  height: calc(170 / 708 * 100cqh);
+  max-width: 170px;
+  max-height: 170px;
   transform: translateX(-50%);
   z-index: 5;
 }
@@ -171,51 +173,59 @@ const { next } = useStepper();
   position: absolute;
   left: 0;
   right: 0;
-  top: clamp(210px, 30.6vh, 259px);
+  top: calc(259 / 708 * 100cqh);
   margin: 0;
   text-align: center;
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: clamp(30px, 8.7vw, 36px);
+  font-size: calc(36 / 356 * 100cqw);
   line-height: 1.22;
   color: var(--color-brand);
   z-index: 5;
 }
 
+/* 正文 @(62,426) 278×175 → 卡片内 (43,326) */
 .body {
   position: absolute;
-  left: 12%;
-  right: 12%;
-  top: clamp(292px, 38.5vh, 326px);
+  left: calc(43 / 356 * 100cqw);
+  right: calc(35 / 356 * 100cqw);
+  top: calc(326 / 708 * 100cqh);
+  max-height: calc(175 / 708 * 100cqh);
   margin: 0;
   text-align: justify;
   text-justify: inter-character;
   font-family: var(--font-serif);
   font-weight: 500;
-  font-size: clamp(14px, 4.05vw, 16px);
-  line-height: clamp(24px, 3.5vh, 30px);
+  font-size: calc(16 / 356 * 100cqw);
+  line-height: calc(30 / 16);
   letter-spacing: 0;
   color: var(--color-serif-ink);
   z-index: 5;
 }
 
+/* 按钮 @(108,580) 177×44 → 卡片内 top 480；与正文区至少留 24px */
 .cta {
   position: absolute;
   left: 50%;
-  top: 69.8%;
-  width: 177px;
-  height: 44px;
+  top: max(
+    calc(480 / 708 * 100cqh),
+    calc((326 + 175 + 24) / 708 * 100cqh)
+  );
+  width: calc(177 / 356 * 100cqw);
+  max-width: 177px;
+  height: calc(44 / 708 * 100cqh);
+  max-height: 44px;
   border: 0;
   border-radius: 12px;
   background: transparent;
   font-family: var(--font-title);
   font-weight: 400;
-  font-size: 16px;
+  font-size: calc(16 / 356 * 100cqw);
   color: #fff;
   cursor: pointer;
   pointer-events: auto;
   user-select: none;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   z-index: 20;
 }
 .cta::before {
@@ -239,6 +249,20 @@ const { next } = useStepper();
   opacity: 0.65;
 }
 
+@media (max-width: 420px) {
+  .body {
+    font-size: calc(15 / 356 * 100cqw);
+    line-height: 1.45;
+  }
+
+  .cta {
+    top: max(
+      calc(480 / 708 * 100cqh),
+      calc((326 + 190 + 20) / 708 * 100cqh)
+    );
+  }
+}
+
 @media (max-height: 720px) {
   .welcome-card {
     top: 70px;
@@ -246,8 +270,15 @@ const { next } = useStepper();
   }
 
   .body {
-    left: 11%;
-    right: 11%;
+    line-height: 1.45;
+    max-height: calc(160 / 708 * 100cqh);
+  }
+
+  .cta {
+    top: max(
+      calc(468 / 708 * 100cqh),
+      calc((326 + 160 + 18) / 708 * 100cqh)
+    );
   }
 }
 

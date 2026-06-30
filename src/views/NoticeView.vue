@@ -82,9 +82,8 @@ function onPhotoPicked() {
     <section class="notice-stage" aria-label="录取通知书">
       <div class="notice-paper-wrap">
         <img :src="noticeDisplayUrl" alt="录取通知书" class="notice-paper" />
+        <p class="save-tip">*长按保存通知书</p>
       </div>
-
-      <p class="save-tip">*长按保存通知书</p>
 
       <div class="action-bar">
         <button class="action-btn" type="button" @click="onGeneratePhoto">生成合影</button>
@@ -210,6 +209,8 @@ function onPhotoPicked() {
   aspect-ratio: 2480 / 3508;
   overflow: hidden;
   pointer-events: none;
+  container-type: inline-size;
+  container-name: notice-paper;
 }
 
 .notice-paper {
@@ -223,20 +224,24 @@ function onPhotoPicked() {
   pointer-events: auto;
 }
 
-/* *长按保存：设计稿 @(280,628)，相对通知书图 @(18,138) => 舞台内 @(262,490) */
+/* *长按保存 @(280,628) — 右下锚定，内收避免 262+102>357 在宽屏溢出 */
 .save-tip {
   position: absolute;
-  left: 248px;
-  top: 485px;
+  right: calc(8 / 357 * 100%);
+  left: auto;
+  top: calc(490 / 505 * 100%);
+  width: auto;
+  max-width: calc(95 / 357 * 100%);
   margin: 0;
-  width: 102px;
+  box-sizing: border-box;
   font-family: "Founder", "FangSong", "STFangsong", var(--font-serif);
   font-weight: 400;
-  font-size: 9px;
-  line-height: 21px;
+  font-size: clamp(7px, calc(9 / 357 * 100cqi), 9px);
+  line-height: calc(21 / 9);
   letter-spacing: 0;
   color: #fff;
   text-align: right;
+  white-space: nowrap;
   pointer-events: none;
   z-index: 6;
 }
