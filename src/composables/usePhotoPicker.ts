@@ -3,15 +3,22 @@ import { useStudentStore } from "@/stores/student";
 import { fileToDataUrl } from "@/utils/image";
 
 /**
- * 将选中的图片写入 store，供合影页拍立得展示。
- * 选图 UI 由 PhotoPickerInput 调起（移动端：照片图库 / 拍照 / 选取文件）。
+ * 读取选中的图片；默认写入 store.photoSource（合影页「更换照片」）。
+ * 通知书首次选图请传 applyToStore: false，仅触发流程不替换占位图。
  */
-export async function onPhotoFileChange(e: Event): Promise<boolean> {
+export async function onPhotoFileChange(
+  e: Event,
+  options: { applyToStore?: boolean } = {},
+): Promise<boolean> {
+  const applyToStore = options.applyToStore ?? true;
   const { photoSource } = storeToRefs(useStudentStore());
   const input = e.target as HTMLInputElement;
   const file = input.files?.[0];
   if (!file) return false;
-  photoSource.value = await fileToDataUrl(file);
+  const dataUrl = await fileToDataUrl(file);
   input.value = "";
+  if (applyToStore) {
+    photoSource.value = dataUrl;
+  }
   return true;
 }

@@ -1,19 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
-import { storeToRefs } from "pinia";
 import { useStepper } from "@/composables/useStepper";
-import { useStudentStore } from "@/stores/student";
 import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
-const { photoSource } = storeToRefs(useStudentStore());
 let timer: number | undefined;
 
 onMounted(() => {
-  if (!photoSource.value) {
-    goto("notice");
-    return;
-  }
   timer = window.setTimeout(() => goto("photo"), 2200);
 });
 onUnmounted(() => window.clearTimeout(timer));

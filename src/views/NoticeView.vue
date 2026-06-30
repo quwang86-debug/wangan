@@ -9,7 +9,8 @@ import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
 const { compose } = usePdfSave();
-const { name, studentNo } = storeToRefs(useStudentStore());
+const store = useStudentStore();
+const { name, studentNo } = storeToRefs(store);
 const photoPickerRef = ref<InstanceType<typeof PhotoPickerInput> | null>(null);
 
 const noticeImg = assetUrl("assets/img/notice-paper.jpg");
@@ -50,6 +51,7 @@ function onGeneratePhoto() {
 }
 
 function onPhotoPicked() {
+  store.photoSource = null;
   goto("photo-loading");
 }
 </script>
@@ -90,7 +92,7 @@ function onPhotoPicked() {
       </div>
     </section>
 
-    <PhotoPickerInput ref="photoPickerRef" @picked="onPhotoPicked" />
+    <PhotoPickerInput ref="photoPickerRef" :apply-to-store="false" @picked="onPhotoPicked" />
   </div>
 </template>
 

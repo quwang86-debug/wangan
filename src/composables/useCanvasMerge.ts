@@ -1,4 +1,4 @@
-import { loadImage } from "@/utils/image";
+import { drawCover, loadImage } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
 
 /**
@@ -12,6 +12,37 @@ export const POLAROID_WINDOW = {
 } as const;
 
 const FRAME_SRC = assetUrl("assets/img/polaroid.png");
+export const POLAROID_PLACEHOLDER_SRC = assetUrl("assets/img/polaroid-placeholder.jpg");
+
+export type PolaroidWindowSize = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+/** 根据相框原图尺寸计算透明方框像素大小（默认 3508×2480 → 1375×1369） */
+export function getPolaroidWindowSize(frameWidth: number, frameHeight: number): PolaroidWindowSize {
+  return {
+    left: POLAROID_WINDOW.left * frameWidth,
+    top: POLAROID_WINDOW.top * frameHeight,
+    width: POLAROID_WINDOW.width * frameWidth,
+    height: POLAROID_WINDOW.height * frameHeight,
+  };
+}
+
+/** 将照片 cover 裁剪到拍立得方框尺寸，供预览占位与合成使用 */
+export async function preparePhotoForPolaroidWindow(photoSrc: string): Promise<string> {
+  const [photo, frame] = await Promise.all([loadImage(photoSrc), loadImage(FRAME_SRC)]);
+  const win = getPolaroidWindowSize(frame.naturalWidth, frame.naturalHeight);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(win.width);
+  canvas.height = Math.round(win.height);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas 2d context 不可用");
+  drawCover(ctx, photo, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/jpeg", 0.92);
+}
 
 export type PhotoCropTransform = {
   scale: number;

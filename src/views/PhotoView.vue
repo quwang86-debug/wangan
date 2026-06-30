@@ -2,8 +2,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useStudentStore } from "@/stores/student";
-import { useCanvasMerge } from "@/composables/useCanvasMerge";
-import { useStepper } from "@/composables/useStepper";
+import { useCanvasMerge, preparePhotoForPolaroidWindow, POLAROID_PLACEHOLDER_SRC } from "@/composables/useCanvasMerge";
 import PhotoPickerInput from "@/components/base/PhotoPickerInput.vue";
 import { downloadDataUrl, shareImage } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
@@ -11,10 +10,10 @@ import { assetUrl } from "@/utils/asset";
 const store = useStudentStore();
 const { name, photoSource } = storeToRefs(store);
 const { compose } = useCanvasMerge();
-const { goto } = useStepper();
 const photoPickerRef = ref<InstanceType<typeof PhotoPickerInput> | null>(null);
 
 const photoFrame = ref<HTMLElement | null>(null);
+const placeholderPhoto = ref<string | null>(null);
 const busy = ref(false);
 const message = ref("");
 const UPLOAD_PROMPT = "请先上传或拍摄一张照片";
@@ -54,8 +53,17 @@ watch(photoSource, (value, prev) => {
 onUnmounted(clearMessageTimer);
 
 onMounted(() => {
-  if (!photoSource.value) goto("notice");
+  void preparePhotoForPolaroidWindow(POLAROID_PLACEHOLDER_SRC)
+    .then((dataUrl) => {
+      placeholderPhoto.value = dataUrl;
+    })
+    .catch(() => {
+      placeholderPhoto.value = null;
+    });
 });
+
+const hasUserPhoto = computed(() => !!photoSource.value);
+const displayPhoto = computed(() => photoSource.value ?? placeholderPhoto.value);
 
 const cropScale = ref(1);
 const cropX = ref(0);
@@ -103,13 +111,14 @@ function openChangePhotoPicker() {
 }
 
 async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
-  if (!photoSource.value) {
+  const photo = displayPhoto.value;
+  if (!photo) {
     showMessage(UPLOAD_PROMPT, 3000);
     return;
   }
   busy.value = true;
   try {
-    const dataUrl = await compose(photoSource.value, cropTransform.value);
+    const dataUrl = await compose(photo, hasUserPhoto.value ? cropTransform.value : { scale: 1, x: 0, y: 0 });
     await fn(dataUrl);
   } finally {
     busy.value = false;
@@ -152,6 +161,7 @@ function onShare() {
 }
 
 function onPhotoLoad(e: Event) {
+  if (!hasUserPhoto.value) return;
   const img = e.target as HTMLImageElement;
   photoRatio.value = img.naturalWidth / img.naturalHeight;
   clampCrop();
@@ -201,7 +211,7 @@ function startSinglePointerDrag(pointer: PointerEvent) {
 }
 
 function onCropPointerDown(e: PointerEvent) {
-  if (!photoSource.value) return;
+  if (!hasUserPhoto.value) return;
   e.preventDefault();
   photoFrame.value?.setPointerCapture(e.pointerId);
   activePointers.set(e.pointerId, e);
@@ -215,7 +225,7 @@ function onCropPointerDown(e: PointerEvent) {
 }
 
 function onCropPointerMove(e: PointerEvent) {
-  if (!photoSource.value || !activePointers.has(e.pointerId)) return;
+  if (!hasUserPhoto.value || !activePointers.has(e.pointerId)) return;
   e.preventDefault();
   activePointers.set(e.pointerId, e);
   if (activePointers.size >= 2) {
@@ -243,7 +253,7 @@ function onCropPointerEnd(e: PointerEvent) {
 }
 
 function onCropWheel(e: WheelEvent) {
-  if (!photoSource.value) return;
+  if (!hasUserPhoto.value) return;
   e.preventDefault();
   adjustZoom(e.deltaY > 0 ? -0.08 : 0.08);
 }
@@ -286,7 +296,7 @@ function onCropWheel(e: WheelEvent) {
               <div
                 ref="photoFrame"
                 class="polaroid-photo"
-                :class="{ 'polaroid-photo--empty': !photoSource }"
+                :class="{ 'polaroid-photo--empty': !displayPhoto }"
                 aria-label="合影照片"
                 @pointerdown="onCropPointerDown"
                 @pointermove="onCropPointerMove"
@@ -295,9 +305,9 @@ function onCropWheel(e: WheelEvent) {
                 @wheel="onCropWheel"
               >
                 <img
-                  v-if="photoSource"
-                  :src="photoSource"
-                  :style="photoStyle"
+                  v-if="displayPhoto"
+                  :src="displayPhoto"
+                  :style="hasUserPhoto ? photoStyle : undefined"
                   alt="入学合影"
                   @load="onPhotoLoad"
                 />
@@ -308,27 +318,37 @@ function onCropWheel(e: WheelEvent) {
         </div>
       </div>
 
-      <div v-if="photoSource" class="crop-panel" aria-label="照片裁剪调整">
-        <p class="crop-hint">拖动调整位置，双指或滑块缩放</p>
-        <div class="crop-controls">
-          <button class="crop-btn" type="button" aria-label="缩小照片" @click="adjustZoom(-0.1)">
-            -
-          </button>
-          <input
-            v-model.number="cropScale"
-            class="crop-range"
-            type="range"
-            :min="MIN_CROP_SCALE"
-            :max="MAX_CROP_SCALE"
-            step="0.01"
-            aria-label="照片缩放"
-            @input="clampCrop"
-          />
-          <button class="crop-btn" type="button" aria-label="放大照片" @click="adjustZoom(0.1)">
-            +
-          </button>
-          <button class="change-photo-btn" type="button" @click="openChangePhotoPicker">更换照片</button>
-        </div>
+      <div v-if="displayPhoto" class="crop-panel" aria-label="照片裁剪调整">
+        <template v-if="hasUserPhoto">
+          <p class="crop-hint">拖动调整位置，双指或滑块缩放</p>
+          <div class="crop-controls">
+            <button class="crop-btn" type="button" aria-label="缩小照片" @click="adjustZoom(-0.1)">
+              -
+            </button>
+            <input
+              v-model.number="cropScale"
+              class="crop-range"
+              type="range"
+              :min="MIN_CROP_SCALE"
+              :max="MAX_CROP_SCALE"
+              step="0.01"
+              aria-label="照片缩放"
+              @input="clampCrop"
+            />
+            <button class="crop-btn" type="button" aria-label="放大照片" @click="adjustZoom(0.1)">
+              +
+            </button>
+            <button class="change-photo-btn" type="button" @click="openChangePhotoPicker">更换照片</button>
+          </div>
+        </template>
+        <template v-else>
+          <p class="crop-hint crop-hint-placeholder">当前为默认展示，点击更换为你的照片</p>
+          <div class="crop-controls crop-controls-placeholder">
+            <button class="change-photo-btn change-photo-btn--solo" type="button" @click="openChangePhotoPicker">
+              更换照片
+            </button>
+          </div>
+        </template>
       </div>
 
       <div class="action-bar">
@@ -340,7 +360,7 @@ function onCropWheel(e: WheelEvent) {
         </button>
       </div>
 
-      <p v-if="message" class="toast" :class="{ 'toast-with-photo': photoSource }">
+      <p v-if="message" class="toast" :class="{ 'toast-with-photo': displayPhoto }">
         {{ message }}
       </p>
     </div>
@@ -625,6 +645,14 @@ function onCropWheel(e: WheelEvent) {
   font-size: 11px;
   line-height: 26px;
   white-space: nowrap;
+}
+
+.crop-controls-placeholder {
+  justify-content: center;
+}
+
+.change-photo-btn--solo {
+  min-width: 88px;
 }
 
 .crop-range {
