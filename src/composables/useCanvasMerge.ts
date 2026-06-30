@@ -12,7 +12,7 @@ export const POLAROID_WINDOW = {
 } as const;
 
 const FRAME_SRC = assetUrl("assets/img/polaroid.png");
-export const POLAROID_PLACEHOLDER_SRC = assetUrl("assets/img/polaroid-placeholder.jpg");
+export const POLAROID_PLACEHOLDER_SRC = assetUrl("assets/img/polaroid-placeholder.png");
 
 export type PolaroidWindowSize = {
   left: number;

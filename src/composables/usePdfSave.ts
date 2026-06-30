@@ -14,21 +14,21 @@ export const NOTICE_PAPER_FIELDS = {
     left: 0.2369,
     top: 0.4099,
     fontRatio: 0.033613,
-    fontFamily: '"WenYuanSerifSC", "FangSong", "STFangsong", serif',
+    fontFamily: '"STKaiti", "Kaiti SC", "KaiTi", "LXGWWenKai", serif',
     align: "center" as CanvasTextAlign,
   },
   college: {
     left: 0.6363,
     top: 0.4812,
     fontRatio: 0.033613,
-    fontFamily: '"WenYuanSerifSC", "FangSong", "STFangsong", serif',
+    fontFamily: '"STKaiti", "Kaiti SC", "KaiTi", "LXGWWenKai", serif',
     align: "center" as CanvasTextAlign,
   },
   major: {
     left: 0.4722,
     top: 0.5149,
     fontRatio: 0.033613,
-    fontFamily: '"WenYuanSerifSC", "FangSong", "STFangsong", serif',
+    fontFamily: '"STKaiti", "Kaiti SC", "KaiTi", "LXGWWenKai", serif',
     align: "center" as CanvasTextAlign,
   },
 } as const;
@@ -63,6 +63,17 @@ function drawPaperField(
  */
 export function usePdfSave() {
   async function compose(overlay: NoticePaperOverlay): Promise<string> {
+    // 主动加载套打用 webfont（非苹果设备无系统楷体时的回退），确保 canvas 绘制前就绪
+    if (document.fonts?.load) {
+      try {
+        await Promise.all([
+          document.fonts.load('400 32px "LXGWWenKai"'),
+          document.fonts.load('400 32px "SourceHanSansCN"'),
+        ]);
+      } catch {
+        /* 忽略字体加载失败，使用回退字体 */
+      }
+    }
     if (document.fonts?.ready) await document.fonts.ready;
 
     const paper = await loadImage(PAPER_SRC);

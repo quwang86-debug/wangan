@@ -161,10 +161,11 @@ const { next } = useStepper();
   position: absolute;
   left: 50%;
   top: calc(62 / 708 * 100cqh);
-  width: calc(170 / 356 * 100cqw);
-  height: calc(170 / 708 * 100cqh);
+  width: min(calc(170 / 356 * 100cqw), calc(170 / 708 * 100cqh));
+  aspect-ratio: 1 / 1;
+  height: auto;
   max-width: 170px;
-  max-height: 170px;
+  object-fit: contain;
   transform: translateX(-50%);
   z-index: 5;
 }

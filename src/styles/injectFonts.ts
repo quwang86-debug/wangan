@@ -23,6 +23,13 @@ export function injectFonts(): void {
   font-display: swap;
 }
 @font-face {
+  font-family: "LXGWWenKai";
+  src: url("${assetUrl("assets/fonts/LXGWWenKai-Regular.subset.woff2")}") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
   font-family: "AlibabaPuHuiTi";
   src: url("${assetUrl("assets/fonts/AlibabaPuHuiTi-Medium.subset.woff2")}") format("woff2");
   font-weight: 500;
