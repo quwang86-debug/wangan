@@ -1,32 +1,32 @@
 import { loadImage } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
 
-/** 套打字段相对通知书原图 (2480×3508) 的位置，与 NoticeView 预览一致 */
+/** 套打字段相对通知书原图 (2480×3508) 的位置，与 NoticeView 预览一致（对齐 通知书（新）.svg 空白区） */
 export const NOTICE_PAPER_FIELDS = {
   studentNo: {
-    left: 0.6863,
-    top: 0.383,
+    left: 0.672,
+    top: 0.3825,
     fontRatio: 0.02521,
     fontFamily: '"SourceHanSansCN", "Source Han Sans SC", sans-serif',
     align: "left" as CanvasTextAlign,
   },
   studentName: {
-    left: 0.2369,
-    top: 0.4099,
+    left: 0.2512,
+    top: 0.4124,
     fontRatio: 0.033613,
     fontFamily: '"STKaiti", "Kaiti SC", "KaiTi", "LXGWWenKai", serif',
     align: "center" as CanvasTextAlign,
   },
   college: {
-    left: 0.6363,
-    top: 0.4812,
+    left: 0.672,
+    top: 0.4828,
     fontRatio: 0.033613,
     fontFamily: '"STKaiti", "Kaiti SC", "KaiTi", "LXGWWenKai", serif',
     align: "center" as CanvasTextAlign,
   },
   major: {
-    left: 0.4722,
-    top: 0.5149,
+    left: 0.5099,
+    top: 0.5176,
     fontRatio: 0.033613,
     fontFamily: '"STKaiti", "Kaiti SC", "KaiTi", "LXGWWenKai", serif',
     align: "center" as CanvasTextAlign,
