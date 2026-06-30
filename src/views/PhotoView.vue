@@ -283,9 +283,13 @@ function onCropWheel(e: WheelEvent) {
     </header>
 
     <div class="photo-body">
-      <h1 class="title">我在网安等你</h1>
-      <p class="subtitle">{{ subtitleLabel }}</p>
-      <img class="photo-badge" :src="assetUrl('assets/img/photo-badge.png')" alt="" />
+      <div class="photo-headline-row">
+        <div class="photo-headline">
+          <h1 class="title">我在网安等你</h1>
+          <p class="subtitle">{{ subtitleLabel }}</p>
+        </div>
+        <img class="photo-badge" :src="assetUrl('assets/img/photo-badge.png')" alt="" />
+      </div>
 
       <div class="polaroid-stage">
         <div class="card" aria-hidden="true" />
@@ -318,7 +322,8 @@ function onCropWheel(e: WheelEvent) {
         </div>
       </div>
 
-      <div v-if="displayPhoto" class="crop-panel" aria-label="照片裁剪调整">
+      <!-- 裁剪 / 更换照片：暂隐藏，保留 DOM 与逻辑便于后续恢复 -->
+      <div v-if="displayPhoto" class="crop-panel" aria-label="照片裁剪调整" hidden>
         <template v-if="hasUserPhoto">
           <p class="crop-hint">拖动调整位置，双指或滑块缩放</p>
           <div class="crop-controls">
@@ -365,7 +370,8 @@ function onCropWheel(e: WheelEvent) {
       </p>
     </div>
 
-    <PhotoPickerInput ref="photoPickerRef" />
+    <!-- 更换照片选图器：暂隐藏入口，组件保留 -->
+    <PhotoPickerInput ref="photoPickerRef" class="photo-picker-hidden" />
   </div>
 </template>
 
@@ -469,23 +475,37 @@ function onCropWheel(e: WheelEvent) {
   padding-bottom: max(clamp(24px, 4vh, 36px), env(safe-area-inset-bottom, 0px));
 }
 
+/* 标题 + 副标题 + 右侧 logo：同行 flex，logo 与文字块垂直居中对齐 */
+.photo-headline-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.8vw, 10px);
+  margin: clamp(24px, 4vh, 36px) clamp(18px, 4.6vw, 24px) 0 clamp(18px, 8.1vw, 32px);
+  z-index: 6;
+}
+
+.photo-headline {
+  flex: 1;
+  min-width: 0;
+}
+
 /* z6 标题区 @ (32,160) */
 .title {
   position: relative;
-  margin: clamp(24px, 4vh, 36px) 0 0 clamp(18px, 8.1vw, 32px);
+  margin: 0;
   width: fit-content;
-  max-width: calc(100% - clamp(100px, 28vw, 120px));
+  max-width: 100%;
   font-family: var(--font-title);
   font-weight: 400;
   font-size: clamp(26px, 8.1vw, 32px);
   line-height: 1.22;
   color: #fff;
-  z-index: 6;
 }
 
 .subtitle {
   position: relative;
-  margin: clamp(8px, 1.2vh, 12px) 0 0 clamp(20px, 9.2vw, 36px);
+  margin: clamp(8px, 1.2vh, 12px) 0 0 clamp(2px, 0.5vw, 4px);
   font-family: var(--font-mono);
   font-weight: 500;
   font-size: clamp(12px, 3.6vw, 14px);
@@ -493,29 +513,31 @@ function onCropWheel(e: WheelEvent) {
   letter-spacing: 2px;
   color: #fff;
   white-space: nowrap;
-  z-index: 6;
 }
 
+/* logo圆 @ (264.7,132) 121×118 — 与左侧标题区垂直居中 */
 .photo-badge {
-  position: absolute;
-  right: clamp(18px, 4.6vw, 24px);
-  top: clamp(48px, 6.5vh, 62px);
+  position: relative;
+  flex-shrink: 0;
   width: clamp(72px, 21.9vw, 86px);
   height: clamp(70px, 21.1vw, 83px);
   object-fit: contain;
   pointer-events: none;
-  z-index: 6;
 }
 
 /*
- * 拍立得 + 卡片：外层固定 416×546 宽高比，内部沿用 779×550 坐标系百分比定位，
- * 宽度随视口居中缩放，蒙版与白窗对齐关系不变。
+ * 拍立得 + 卡片：设计稿 @(-8,226) 416×546
+ * 393 标准宽左偏 -8；更宽屏（如 Pro Max）自动水平居中，避免右侧大留白
  */
 .polaroid-stage {
   position: relative;
-  width: min(calc(100% - clamp(24px, 7%, 32px)), 416px);
+  --polaroid-w: min(416px, calc(100% + 23px));
+  width: var(--polaroid-w);
+  max-width: 416px;
   aspect-ratio: 416 / 546;
-  margin: clamp(6px, 1.2vh, 10px) auto 0;
+  margin-top: 22px;
+  margin-left: max(-8px, calc(50% - var(--polaroid-w) / 2));
+  margin-right: auto;
   z-index: 11;
 }
 
@@ -567,9 +589,7 @@ function onCropWheel(e: WheelEvent) {
   height: calc(1369 / 2480 * 100%);
   overflow: hidden;
   background: transparent;
-  cursor: pointer;
-  pointer-events: auto;
-  touch-action: none;
+  pointer-events: none;
   user-select: none;
   z-index: 1;
 }
@@ -595,14 +615,20 @@ function onCropWheel(e: WheelEvent) {
   z-index: 2;
 }
 
+/* 裁剪面板（提示文案 / 更换照片 / 缩放滑块）：暂隐藏 */
 .crop-panel {
+  display: none !important;
   position: absolute;
   left: 35px;
   right: 35px;
   top: 652px;
   margin: 0;
   z-index: 21;
-  pointer-events: auto;
+  pointer-events: none;
+}
+
+.photo-picker-hidden {
+  display: none;
 }
 
 .crop-hint {
@@ -776,8 +802,11 @@ function onCropWheel(e: WheelEvent) {
     padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
   }
 
-  .title {
+  .photo-headline-row {
     margin-top: 20px;
+  }
+
+  .title {
     font-size: clamp(24px, 7.5vw, 28px);
   }
 
@@ -786,14 +815,16 @@ function onCropWheel(e: WheelEvent) {
   }
 
   .photo-badge {
-    top: 40px;
     width: clamp(64px, 19vw, 76px);
     height: clamp(62px, 18.5vw, 74px);
   }
 
   .polaroid-stage {
-    margin-top: 4px;
-    width: min(calc(100% - 72px), 320px);
+    --polaroid-w: min(320px, calc(100% + 16px));
+    width: var(--polaroid-w);
+    max-width: 320px;
+    margin-top: 16px;
+    margin-left: max(-6px, calc(50% - var(--polaroid-w) / 2));
   }
 
   .crop-panel {
