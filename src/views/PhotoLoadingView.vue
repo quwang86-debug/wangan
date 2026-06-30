@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from "vue";
+import { storeToRefs } from "pinia";
 import { useStepper } from "@/composables/useStepper";
+import { useStudentStore } from "@/stores/student";
 import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
+const { photoSource } = storeToRefs(useStudentStore());
 let timer: number | undefined;
 
 onMounted(() => {
-  // 过渡动画后进入合影页（落地时改为合成完成回调）
+  if (!photoSource.value) {
+    goto("notice");
+    return;
+  }
   timer = window.setTimeout(() => goto("photo"), 2200);
 });
 onUnmounted(() => window.clearTimeout(timer));

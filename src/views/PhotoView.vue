@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useStudentStore } from "@/stores/student";
 import { useCanvasMerge } from "@/composables/useCanvasMerge";
-import { fileToDataUrl, downloadDataUrl, shareImage } from "@/utils/image";
+import { useStepper } from "@/composables/useStepper";
+import PhotoPickerInput from "@/components/base/PhotoPickerInput.vue";
+import { downloadDataUrl, shareImage } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
 
 const store = useStudentStore();
 const { name, photoSource } = storeToRefs(store);
 const { compose } = useCanvasMerge();
+const { goto } = useStepper();
+const photoPickerRef = ref<InstanceType<typeof PhotoPickerInput> | null>(null);
 
-const fileInput = ref<HTMLInputElement | null>(null);
 const photoFrame = ref<HTMLElement | null>(null);
 const busy = ref(false);
 const message = ref("");
@@ -36,7 +39,12 @@ function showMessage(text: string, autoHideMs?: number) {
   }
 }
 
-watch(photoSource, (value) => {
+watch(photoSource, (value, prev) => {
+  if (value && value !== prev) {
+    photoRatio.value = null;
+    resetCrop();
+    activePointers.clear();
+  }
   if (value && message.value === UPLOAD_PROMPT) {
     message.value = "";
     clearMessageTimer();
@@ -44,6 +52,11 @@ watch(photoSource, (value) => {
 });
 
 onUnmounted(clearMessageTimer);
+
+onMounted(() => {
+  if (!photoSource.value) goto("notice");
+});
+
 const cropScale = ref(1);
 const cropX = ref(0);
 const cropY = ref(0);
@@ -85,14 +98,8 @@ const photoStyle = computed(() => ({
   "--photo-y": `${cropY.value * 100}%`,
 }));
 
-async function onFileChange(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0];
-  if (!file) return;
-  photoSource.value = await fileToDataUrl(file);
-  photoRatio.value = null;
-  resetCrop();
-  activePointers.clear();
-  (e.target as HTMLInputElement).value = "";
+function openChangePhotoPicker() {
+  photoPickerRef.value?.openPhotoPicker();
 }
 
 async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
@@ -142,10 +149,6 @@ function onShare() {
           : getShareFallbackMessage();
     showMessage(text, r === "cancelled" ? 2500 : 5000);
   });
-}
-
-function onPhotoClick() {
-  if (!photoSource.value) fileInput.value?.click();
 }
 
 function onPhotoLoad(e: Event) {
@@ -283,11 +286,8 @@ function onCropWheel(e: WheelEvent) {
               <div
                 ref="photoFrame"
                 class="polaroid-photo"
-                role="button"
-                tabindex="0"
-                aria-label="上传照片"
-                @click="onPhotoClick"
-                @keydown.enter="fileInput?.click()"
+                :class="{ 'polaroid-photo--empty': !photoSource }"
+                aria-label="合影照片"
                 @pointerdown="onCropPointerDown"
                 @pointermove="onCropPointerMove"
                 @pointerup="onCropPointerEnd"
@@ -327,7 +327,7 @@ function onCropWheel(e: WheelEvent) {
           <button class="crop-btn" type="button" aria-label="放大照片" @click="adjustZoom(0.1)">
             +
           </button>
-          <button class="change-photo-btn" type="button" @click="fileInput?.click()">更换照片</button>
+          <button class="change-photo-btn" type="button" @click="openChangePhotoPicker">更换照片</button>
         </div>
       </div>
 
@@ -345,7 +345,7 @@ function onCropWheel(e: WheelEvent) {
       </p>
     </div>
 
-    <input ref="fileInput" type="file" accept="image/*" hidden @change="onFileChange" />
+    <PhotoPickerInput ref="photoPickerRef" />
   </div>
 </template>
 

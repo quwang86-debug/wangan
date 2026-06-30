@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useStepper } from "@/composables/useStepper";
+import PhotoPickerInput from "@/components/base/PhotoPickerInput.vue";
 import { useStudentStore } from "@/stores/student";
 import { assetUrl } from "@/utils/asset";
 
 const { goto } = useStepper();
 const { name, studentNo } = storeToRefs(useStudentStore());
+const photoPickerRef = ref<InstanceType<typeof PhotoPickerInput> | null>(null);
 
 const noticeImg = assetUrl("assets/img/notice-paper.jpg");
 const noticeBottomDeco = assetUrl("assets/img/verify-deco.png");
@@ -18,6 +20,14 @@ const noticeStudentName = computed(() => {
   const value = name.value.trim();
   return value && value !== "新同学" ? value : "网小安";
 });
+
+function onGeneratePhoto() {
+  photoPickerRef.value?.openPhotoPicker();
+}
+
+function onPhotoPicked() {
+  goto("photo-loading");
+}
 </script>
 
 <template>
@@ -57,10 +67,12 @@ const noticeStudentName = computed(() => {
       <p class="save-tip">*长按保存通知书</p>
 
       <div class="action-bar">
-        <button class="action-btn" type="button" @click="goto('photo-loading')">生成合影</button>
+        <button class="action-btn" type="button" @click="onGeneratePhoto">生成合影</button>
         <button class="action-btn" type="button" @click="goto('register')">查看报道说明</button>
       </div>
     </section>
+
+    <PhotoPickerInput ref="photoPickerRef" @picked="onPhotoPicked" />
   </div>
 </template>
 
