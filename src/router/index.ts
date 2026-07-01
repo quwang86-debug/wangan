@@ -4,12 +4,13 @@ import VerifyView from "@/views/VerifyView.vue";
 import NoticeView from "@/views/NoticeView.vue";
 import PhotoLoadingView from "@/views/PhotoLoadingView.vue";
 import PhotoView from "@/views/PhotoView.vue";
+import FaceVerifyView from "@/views/FaceVerifyView.vue";
 import RegisterView from "@/views/RegisterView.vue";
 
 /**
  * 流程式路由：
- * 欢迎 → 核验 → 通知书 → 合影 → 注册
- * photo-loading 为过渡页：仅通知书「生成合影」选图后出现，不在主流程链中。
+ * 欢迎 → 核验 → 人脸核验 → 通知书 → 合影 → 注册
+ * face-verify / photo-loading 为过渡页，不在 useStepper 主流程链中。
  *
  * 注意：此处使用「静态导入」而非懒加载 `() => import()`。
  * App.vue 用 <transition mode="out-in"> 包裹路由组件，
@@ -31,6 +32,12 @@ export const router = createRouter({
       name: "verify",
       component: VerifyView,
       meta: { step: 2, title: "身份核验" },
+    },
+    {
+      path: "/face-verify",
+      name: "face-verify",
+      component: FaceVerifyView,
+      meta: { title: "人脸识别" },
     },
     {
       path: "/notice",

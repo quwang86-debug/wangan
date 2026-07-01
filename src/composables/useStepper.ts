@@ -3,8 +3,8 @@ import { useRouter } from "vue-router";
 /** 主流程步骤（不含过渡页 photo-loading） */
 const ORDER = ["welcome", "verify", "notice", "photo", "register"] as const;
 type FlowStep = (typeof ORDER)[number];
-/** 含合影加载过渡页（仅通知书选图后进入，不参与 next 链） */
-type StepName = FlowStep | "photo-loading";
+/** 含过渡页（不参与 next 链） */
+type StepName = FlowStep | "face-verify" | "photo-loading";
 
 export function useStepper() {
   const router = useRouter();

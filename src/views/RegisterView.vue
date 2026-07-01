@@ -1,29 +1,15 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { storeToRefs } from "pinia";
-import { useStudentStore } from "@/stores/student";
 import { assetUrl } from "@/utils/asset";
-import { copyToClipboard } from "@/utils/clipboard";
 
-const REGISTER_URL = "https://admission.example.edu.cn/register";
+const showWecomCard = ref(false);
 
-const { studentNo } = storeToRefs(useStudentStore());
-const copyTip = ref("");
-
-let copyTimer: ReturnType<typeof setTimeout> | null = null;
-
-function goRegister() {
-  window.open(REGISTER_URL, "_blank", "noopener");
+function openWecomCard() {
+  showWecomCard.value = true;
 }
 
-async function copyStudentNo() {
-  if (copyTimer) clearTimeout(copyTimer);
-  const ok = await copyToClipboard(studentNo.value);
-  copyTip.value = ok ? "学号已复制" : "复制失败，请长按学号手动复制";
-  copyTimer = setTimeout(() => {
-    copyTip.value = "";
-    copyTimer = null;
-  }, 2500);
+function closeWecomCard() {
+  showWecomCard.value = false;
 }
 </script>
 
@@ -46,28 +32,16 @@ async function copyStudentNo() {
     <h1 class="page-title">线上注册与到校报到</h1>
 
     <section class="info-card" aria-label="企微注册与报到信息">
-      <!-- 加入企微 @ card(19,26) -->
       <div class="info-block info-block-wecom">
-        <h2 class="section-title">加入企微</h2>
+        <h2 class="section-title">新生注册</h2>
         <div class="section-body">
           <span class="accent-bar accent-bar-wecom" />
           <p class="section-content">
-            2026年<br />即日起 — 8月15日18：00<br />加入校园企微完成新生注册
+            2026年<br />即日起 — 8月15日18：00<br />添加校园企微客服完成新生注册
           </p>
         </div>
       </div>
 
-      <!-- 学号说明 @ card(41,164) 205×38 -->
-      <div class="register-note">
-        <p class="register-note-main">注：使用学号与身份证后6位进行注册登录</p>
-        <p class="register-note-row">
-          <span class="register-note-id">你的学号：{{ studentNo }}</span>
-          <button class="copy-btn" type="button" @click="copyStudentNo">点击复制</button>
-        </p>
-        <p class="register-note-sub">如身份证号码最后一位为x需小写</p>
-      </div>
-
-      <!-- 到校报到 / 报到地点 @ card(8,232) -->
       <div class="info-block-group">
         <span class="divider-line divider-top" aria-hidden="true" />
 
@@ -95,9 +69,76 @@ async function copyStudentNo() {
       </div>
     </section>
 
-    <button class="register-btn" type="button" @click="goRegister">前往企微注册</button>
+    <button class="register-btn" type="button" @click="openWecomCard">添加企微客服</button>
 
-    <p v-if="copyTip" class="copy-tip">{{ copyTip }}</p>
+    <Teleport to="body">
+      <div
+        v-if="showWecomCard"
+        class="wecom-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wecom-card-title"
+        @click.self="closeWecomCard"
+      >
+        <div class="wecom-card">
+          <button class="wecom-card-close" type="button" aria-label="关闭" @click="closeWecomCard">
+            ×
+          </button>
+
+          <div class="wecom-card-header">
+            <div class="wecom-card-avatar" aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="48" height="48" rx="8" fill="#0050B5" />
+                <circle cx="24" cy="19" r="8" fill="#fff" opacity="0.92" />
+                <path
+                  d="M10 40c0-7.732 6.268-14 14-14s14 6.268 14 14"
+                  fill="#fff"
+                  opacity="0.92"
+                />
+              </svg>
+            </div>
+            <div class="wecom-card-meta">
+              <h3 id="wecom-card-title" class="wecom-card-name">校园企微客服</h3>
+              <p class="wecom-card-org">@网络空间安全学院</p>
+            </div>
+          </div>
+
+          <div class="wecom-card-qr-wrap">
+            <svg class="wecom-card-qr" viewBox="0 0 120 120" aria-label="企微客服二维码">
+              <rect width="120" height="120" fill="#fff" />
+              <rect x="8" y="8" width="28" height="28" rx="2" fill="#111" />
+              <rect x="12" y="12" width="20" height="20" rx="1" fill="#fff" />
+              <rect x="16" y="16" width="12" height="12" fill="#111" />
+              <rect x="84" y="8" width="28" height="28" rx="2" fill="#111" />
+              <rect x="88" y="12" width="20" height="20" rx="1" fill="#fff" />
+              <rect x="92" y="16" width="12" height="12" fill="#111" />
+              <rect x="8" y="84" width="28" height="28" rx="2" fill="#111" />
+              <rect x="12" y="88" width="20" height="20" rx="1" fill="#fff" />
+              <rect x="16" y="92" width="12" height="12" fill="#111" />
+              <rect x="44" y="8" width="8" height="8" fill="#111" />
+              <rect x="60" y="8" width="8" height="8" fill="#111" />
+              <rect x="44" y="24" width="8" height="8" fill="#111" />
+              <rect x="52" y="44" width="8" height="8" fill="#111" />
+              <rect x="68" y="44" width="8" height="8" fill="#111" />
+              <rect x="44" y="60" width="8" height="8" fill="#111" />
+              <rect x="60" y="68" width="8" height="8" fill="#111" />
+              <rect x="76" y="60" width="8" height="8" fill="#111" />
+              <rect x="44" y="84" width="8" height="8" fill="#111" />
+              <rect x="60" y="92" width="8" height="8" fill="#111" />
+              <rect x="84" y="44" width="8" height="8" fill="#111" />
+              <rect x="100" y="52" width="8" height="8" fill="#111" />
+              <rect x="92" y="68" width="8" height="8" fill="#111" />
+              <rect x="84" y="84" width="8" height="8" fill="#111" />
+              <rect x="100" y="84" width="8" height="8" fill="#111" />
+              <rect x="92" y="100" width="8" height="8" fill="#111" />
+              <rect x="108" y="92" width="4" height="4" fill="#111" />
+            </svg>
+          </div>
+
+          <p class="wecom-card-tip">使用微信扫一扫添加或长按保存到本地</p>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -115,7 +156,6 @@ async function copyStudentNo() {
   box-sizing: border-box;
 }
 
-/* 二进制底纹 @ (29,100) 382×722 */
 .binary-backdrop {
   position: absolute;
   left: clamp(16px, 7.4vw, 29px);
@@ -134,7 +174,6 @@ async function copyStudentNo() {
   z-index: 2;
 }
 
-/* 顶部品牌 @ logo (11,41) */
 .brand-header {
   position: relative;
   margin: max(env(safe-area-inset-top, 0px), 12px) clamp(26px, 7vw, 31px) 0
@@ -168,7 +207,6 @@ async function copyStudentNo() {
   right: 0;
 }
 
-/* 页面标题 @ (24,135) 32px */
 .page-title {
   position: relative;
   margin: clamp(32px, 5.6vh, 48px) 24px 16px;
@@ -180,7 +218,6 @@ async function copyStudentNo() {
   z-index: 4;
 }
 
-/* 信息卡片 @ (24,196) 345×543 r23 — 内部按设计稿绝对坐标 */
 .info-card {
   position: relative;
   margin: 0 24px;
@@ -199,6 +236,10 @@ async function copyStudentNo() {
   width: 238.5px;
 }
 
+.info-block-wecom .section-body {
+  align-items: stretch;
+}
+
 .section-title {
   margin: 0 0 24px;
   font-family: var(--font-title);
@@ -212,7 +253,6 @@ async function copyStudentNo() {
   margin-bottom: 27px;
 }
 
-/* 竖线相对卡片 left:24 = 区块 left:19 + body padding-left:5 */
 .section-body {
   display: flex;
   align-items: flex-start;
@@ -231,7 +271,8 @@ async function copyStudentNo() {
 }
 
 .accent-bar-wecom {
-  height: 120px;
+  align-self: stretch;
+  height: auto;
 }
 
 .accent-bar-medium {
@@ -249,83 +290,15 @@ async function copyStudentNo() {
   color: #fff;
 }
 
-/* 设计稿正文框 216×65，需保证第三行「加入校园企微完成新生注册」不换行 */
 .info-block-wecom .section-content {
   flex: 0 0 216px;
   width: 216px;
 }
 
-/* 学号说明 @ card(41,164) 205×38 */
-.register-note {
-  position: absolute;
-  left: 41px;
-  top: 164px;
-  width: 205px;
-}
-
-.register-note-main {
-  margin: 0 0 4px;
-  font-family: var(--font-title);
-  font-weight: 400;
-  font-size: 11px;
-  line-height: 1.27;
-  color: #fff;
-}
-
-.register-note-row {
-  position: relative;
-  display: block;
-  margin: 0 0 2px;
-  font-family: var(--font-title);
-  font-weight: 400;
-  font-size: 9px;
-  line-height: 1.44;
-  color: #dbdbdb;
-  white-space: nowrap;
-}
-
-.register-note-id {
-  display: inline-block;
-  max-width: 130px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: bottom;
-  user-select: text;
-  -webkit-user-select: text;
-}
-
-.copy-btn {
-  position: absolute;
-  right: 0;
-  top: 0;
-  margin: 0;
-  padding: 0 0 1px;
-  border: 0;
-  background: transparent;
-  font: inherit;
-  color: #dbdbdb;
-  border-bottom: 0.5px solid #dbd5c8;
-  cursor: pointer;
-}
-
-.copy-btn:active {
-  opacity: 0.75;
-}
-
-.register-note-sub {
-  margin: 0;
-  font-family: var(--font-title);
-  font-weight: 400;
-  font-size: 9px;
-  line-height: 1.44;
-  color: #dbdbdb;
-}
-
-/* 分组2 @ card(8,232) 329×274 */
 .info-block-group {
   position: absolute;
   left: 8px;
-  top: 232px;
+  top: 180px;
   width: 329px;
   height: 274px;
 }
@@ -360,7 +333,6 @@ async function copyStudentNo() {
   top: 148px;
 }
 
-/* 按钮 @ (112,763) 156×36 r18 — 移动端略靠下，PC 预览保持设计稿 53px */
 .register-btn {
   position: absolute;
   left: 50%;
@@ -405,19 +377,103 @@ async function copyStudentNo() {
   opacity: 0.85;
 }
 
-.copy-tip {
+.wecom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  box-sizing: border-box;
+}
+
+.wecom-card {
+  position: relative;
+  width: min(100%, 300px);
+  padding: 28px 24px 24px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  box-sizing: border-box;
+}
+
+.wecom-card-close {
   position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+  top: 10px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 28px;
+  color: #999;
+  cursor: pointer;
+}
+
+.wecom-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.wecom-card-avatar {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.wecom-card-avatar svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wecom-card-meta {
+  min-width: 0;
+}
+
+.wecom-card-name {
+  margin: 0 0 4px;
+  font-family: var(--font-title);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #111;
+}
+
+.wecom-card-org {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 13px;
+  line-height: 1.3;
+  color: #888;
+}
+
+.wecom-card-qr-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.wecom-card-qr {
+  width: 160px;
+  height: 160px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.wecom-card-tip {
   margin: 0;
   text-align: center;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 18px;
-  color: rgba(255, 255, 255, 0.92);
-  z-index: 21;
-  pointer-events: none;
+  font-family: var(--font-title);
+  font-size: 13px;
+  line-height: 1.5;
+  color: #666;
 }
 
 @media (max-height: 720px) {
@@ -435,12 +491,8 @@ async function copyStudentNo() {
     top: 20px;
   }
 
-  .register-note {
-    top: 148px;
-  }
-
   .info-block-group {
-    top: 210px;
+    top: 158px;
     height: 250px;
   }
 
@@ -465,10 +517,6 @@ async function copyStudentNo() {
     margin-bottom: 22px;
   }
 
-  .accent-bar-wecom {
-    height: 100px;
-  }
-
   .accent-bar-medium {
     height: 38px;
   }
@@ -483,14 +531,9 @@ async function copyStudentNo() {
   }
 }
 
-/* PC 预览壳内按设计稿距底 53px */
 @media (min-width: 480px) {
   .register-btn {
     bottom: 53px;
-  }
-
-  .copy-tip {
-    bottom: 96px;
   }
 }
 </style>

@@ -13,6 +13,8 @@ export const POLAROID_WINDOW = {
 
 const FRAME_SRC = assetUrl("assets/img/polaroid.png");
 export const POLAROID_PLACEHOLDER_SRC = assetUrl("assets/img/polaroid-placeholder.png");
+/** 人脸识别页头面部占位（1024×1024，适配 3x 屏清晰展示） */
+export const FACE_VERIFY_PLACEHOLDER_SRC = assetUrl("assets/img/face-verify-placeholder.jpg");
 
 export type PolaroidWindowSize = {
   left: number;

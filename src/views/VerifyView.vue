@@ -9,7 +9,7 @@ import { assetUrl } from "@/utils/asset";
 const verifyBgSlides = VERIFY_CAROUSEL_SLIDES.map(verifyCarouselSrc);
 
 const store = useStudentStore();
-const { next } = useStepper();
+const { goto } = useStepper();
 
 const name = ref("");
 const idCard = ref("");
@@ -17,8 +17,7 @@ const idCard = ref("");
 function onVerify() {
   // TODO: 调用后端实名核验 /api/verify（见蓝本 §8）
   store.setProfile({ name: name.value.trim() || "新同学", idCard: idCard.value });
-  store.markVerified();
-  next("verify");
+  goto("face-verify");
 }
 </script>
 
