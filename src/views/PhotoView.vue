@@ -1,86 +1,27 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useStudentStore } from "@/stores/student";
 import { useCanvasMerge, preparePhotoForPolaroidWindow, POLAROID_PLACEHOLDER_SRC } from "@/composables/useCanvasMerge";
-import PhotoPickerInput from "@/components/base/PhotoPickerInput.vue";
 import { downloadDataUrl, shareImage } from "@/utils/image";
 import { assetUrl } from "@/utils/asset";
 
 const store = useStudentStore();
-const { name, photoSource } = storeToRefs(store);
+const { name } = storeToRefs(store);
 const { compose } = useCanvasMerge();
-const photoPickerRef = ref<InstanceType<typeof PhotoPickerInput> | null>(null);
 
-const photoFrame = ref<HTMLElement | null>(null);
-const placeholderPhoto = ref<string | null>(null);
+const displayPhoto = ref<string>(POLAROID_PLACEHOLDER_SRC);
 const busy = ref(false);
-const message = ref("");
-const UPLOAD_PROMPT = "请先上传或拍摄一张照片";
-
-let messageTimer: ReturnType<typeof setTimeout> | null = null;
-
-function clearMessageTimer() {
-  if (messageTimer) {
-    clearTimeout(messageTimer);
-    messageTimer = null;
-  }
-}
-
-function showMessage(text: string, autoHideMs?: number) {
-  clearMessageTimer();
-  message.value = text;
-  if (autoHideMs && autoHideMs > 0) {
-    messageTimer = setTimeout(() => {
-      if (message.value === text) message.value = "";
-      messageTimer = null;
-    }, autoHideMs);
-  }
-}
-
-watch(photoSource, (value, prev) => {
-  if (value && value !== prev) {
-    photoRatio.value = null;
-    resetCrop();
-    activePointers.clear();
-  }
-  if (value && message.value === UPLOAD_PROMPT) {
-    message.value = "";
-    clearMessageTimer();
-  }
-});
-
-onUnmounted(clearMessageTimer);
 
 onMounted(() => {
   void preparePhotoForPolaroidWindow(POLAROID_PLACEHOLDER_SRC)
     .then((dataUrl) => {
-      placeholderPhoto.value = dataUrl;
+      displayPhoto.value = dataUrl;
     })
     .catch(() => {
-      placeholderPhoto.value = null;
+      displayPhoto.value = POLAROID_PLACEHOLDER_SRC;
     });
 });
-
-const hasUserPhoto = computed(() => !!photoSource.value);
-const displayPhoto = computed(() => photoSource.value ?? placeholderPhoto.value);
-
-const cropScale = ref(1);
-const cropX = ref(0);
-const cropY = ref(0);
-const photoRatio = ref<number | null>(null);
-
-const MIN_CROP_SCALE = 1;
-const MAX_CROP_SCALE = 3;
-const PHOTO_WINDOW_RATIO = 1375 / 1369;
-const activePointers = new Map<number, PointerEvent>();
-
-let dragStartX = 0;
-let dragStartY = 0;
-let dragOriginX = 0;
-let dragOriginY = 0;
-let pinchStartDistance = 0;
-let pinchStartScale = 1;
 
 const verifiedStudentName = computed(() => {
   const n = name.value.trim();
@@ -94,31 +35,10 @@ const subtitleLabel = computed(() => {
   return `${label}同学·2026级新生`;
 });
 
-const cropTransform = computed(() => ({
-  scale: cropScale.value,
-  x: cropX.value,
-  y: cropY.value,
-}));
-
-const photoStyle = computed(() => ({
-  "--photo-scale": cropScale.value.toString(),
-  "--photo-x": `${cropX.value * 100}%`,
-  "--photo-y": `${cropY.value * 100}%`,
-}));
-
-function openChangePhotoPicker() {
-  photoPickerRef.value?.openPhotoPicker();
-}
-
 async function withComposite(fn: (dataUrl: string) => Promise<void> | void) {
-  const photo = displayPhoto.value;
-  if (!photo) {
-    showMessage(UPLOAD_PROMPT, 3000);
-    return;
-  }
   busy.value = true;
   try {
-    const dataUrl = await compose(photo, hasUserPhoto.value ? cropTransform.value : { scale: 1, x: 0, y: 0 });
+    const dataUrl = await compose(displayPhoto.value, { scale: 1, x: 0, y: 0 });
     await fn(dataUrl);
   } finally {
     busy.value = false;
@@ -129,133 +49,10 @@ function onDownload() {
   void withComposite((dataUrl) => downloadDataUrl(dataUrl, `网安合影-${verifiedStudentName.value}.png`));
 }
 
-function isWeChatBrowser() {
-  return /micromessenger/i.test(navigator.userAgent);
-}
-
-function isMobileBrowser() {
-  return /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
-}
-
-function getShareFallbackMessage() {
-  if (isWeChatBrowser()) {
-    return "微信内无法直接发朋友圈图片，已尝试保存合影，请从相册发布";
-  }
-  if (isMobileBrowser()) {
-    return "已保存合影，请打开微信/小红书从相册选择发布";
-  }
-  return "已下载合影，请发送到手机后发布到朋友圈/小红书";
-}
-
 function onShare() {
   void withComposite(async (dataUrl) => {
-    const r = await shareImage(dataUrl, `网安合影-${verifiedStudentName.value}.png`, "我在网安等你");
-    const text =
-      r === "shared"
-        ? "已调起系统分享，请选择微信/小红书等应用"
-        : r === "cancelled"
-          ? "已取消分享"
-          : getShareFallbackMessage();
-    showMessage(text, r === "cancelled" ? 2500 : 5000);
+    await shareImage(dataUrl, `网安合影-${verifiedStudentName.value}.png`, "我在网安等你");
   });
-}
-
-function onPhotoLoad(e: Event) {
-  if (!hasUserPhoto.value) return;
-  const img = e.target as HTMLImageElement;
-  photoRatio.value = img.naturalWidth / img.naturalHeight;
-  clampCrop();
-}
-
-function resetCrop() {
-  cropScale.value = 1;
-  cropX.value = 0;
-  cropY.value = 0;
-}
-
-function getCropBounds() {
-  const imageRatio = photoRatio.value ?? PHOTO_WINDOW_RATIO;
-  const baseWidth = imageRatio > PHOTO_WINDOW_RATIO ? imageRatio / PHOTO_WINDOW_RATIO : 1;
-  const baseHeight = imageRatio > PHOTO_WINDOW_RATIO ? 1 : PHOTO_WINDOW_RATIO / imageRatio;
-  return {
-    x: Math.max(0, (baseWidth * cropScale.value - 1) / 2),
-    y: Math.max(0, (baseHeight * cropScale.value - 1) / 2),
-  };
-}
-
-function clampCrop() {
-  cropScale.value = Math.min(MAX_CROP_SCALE, Math.max(MIN_CROP_SCALE, cropScale.value));
-  const bounds = getCropBounds();
-  cropX.value = Math.min(bounds.x, Math.max(-bounds.x, cropX.value));
-  cropY.value = Math.min(bounds.y, Math.max(-bounds.y, cropY.value));
-}
-
-function setCropScale(value: number) {
-  cropScale.value = value;
-  clampCrop();
-}
-
-function adjustZoom(delta: number) {
-  setCropScale(Number((cropScale.value + delta).toFixed(2)));
-}
-
-function distance(a: PointerEvent, b: PointerEvent) {
-  return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-}
-
-function startSinglePointerDrag(pointer: PointerEvent) {
-  dragStartX = pointer.clientX;
-  dragStartY = pointer.clientY;
-  dragOriginX = cropX.value;
-  dragOriginY = cropY.value;
-}
-
-function onCropPointerDown(e: PointerEvent) {
-  if (!hasUserPhoto.value) return;
-  e.preventDefault();
-  photoFrame.value?.setPointerCapture(e.pointerId);
-  activePointers.set(e.pointerId, e);
-  if (activePointers.size === 1) {
-    startSinglePointerDrag(e);
-  } else if (activePointers.size === 2) {
-    const [a, b] = [...activePointers.values()];
-    pinchStartDistance = distance(a, b);
-    pinchStartScale = cropScale.value;
-  }
-}
-
-function onCropPointerMove(e: PointerEvent) {
-  if (!hasUserPhoto.value || !activePointers.has(e.pointerId)) return;
-  e.preventDefault();
-  activePointers.set(e.pointerId, e);
-  if (activePointers.size >= 2) {
-    const [a, b] = [...activePointers.values()];
-    if (pinchStartDistance > 0) {
-      setCropScale(pinchStartScale * (distance(a, b) / pinchStartDistance));
-    }
-    return;
-  }
-
-  const frame = photoFrame.value;
-  if (!frame) return;
-  cropX.value = dragOriginX + (e.clientX - dragStartX) / frame.clientWidth;
-  cropY.value = dragOriginY + (e.clientY - dragStartY) / frame.clientHeight;
-  clampCrop();
-}
-
-function onCropPointerEnd(e: PointerEvent) {
-  if (!activePointers.has(e.pointerId)) return;
-  activePointers.delete(e.pointerId);
-  photoFrame.value?.releasePointerCapture(e.pointerId);
-  if (activePointers.size === 1) {
-    startSinglePointerDrag([...activePointers.values()][0]);
-  }
-}
-
-function onCropWheel(e: WheelEvent) {
-  if (!hasUserPhoto.value) return;
-  e.preventDefault();
-  adjustZoom(e.deltaY > 0 ? -0.08 : 0.08);
 }
 </script>
 
@@ -297,63 +94,13 @@ function onCropWheel(e: WheelEvent) {
         <div class="polaroid-scaler">
           <div class="polaroid">
             <div class="polaroid-art">
-              <div
-                ref="photoFrame"
-                class="polaroid-photo"
-                :class="{ 'polaroid-photo--empty': !displayPhoto }"
-                aria-label="合影照片"
-                @pointerdown="onCropPointerDown"
-                @pointermove="onCropPointerMove"
-                @pointerup="onCropPointerEnd"
-                @pointercancel="onCropPointerEnd"
-                @wheel="onCropWheel"
-              >
-                <img
-                  v-if="displayPhoto"
-                  :src="displayPhoto"
-                  :style="hasUserPhoto ? photoStyle : undefined"
-                  alt="入学合影"
-                  @load="onPhotoLoad"
-                />
+              <div class="polaroid-photo" aria-label="合影照片">
+                <img :src="displayPhoto" alt="入学合影" />
               </div>
               <img class="polaroid-frame" :src="assetUrl('assets/img/polaroid.png')" alt="" />
             </div>
           </div>
         </div>
-      </div>
-
-      <!-- 裁剪 / 更换照片：暂隐藏，保留 DOM 与逻辑便于后续恢复 -->
-      <div v-if="displayPhoto" class="crop-panel" aria-label="照片裁剪调整" hidden>
-        <template v-if="hasUserPhoto">
-          <p class="crop-hint">拖动调整位置，双指或滑块缩放</p>
-          <div class="crop-controls">
-            <button class="crop-btn" type="button" aria-label="缩小照片" @click="adjustZoom(-0.1)">
-              -
-            </button>
-            <input
-              v-model.number="cropScale"
-              class="crop-range"
-              type="range"
-              :min="MIN_CROP_SCALE"
-              :max="MAX_CROP_SCALE"
-              step="0.01"
-              aria-label="照片缩放"
-              @input="clampCrop"
-            />
-            <button class="crop-btn" type="button" aria-label="放大照片" @click="adjustZoom(0.1)">
-              +
-            </button>
-            <button class="change-photo-btn" type="button" @click="openChangePhotoPicker">更换照片</button>
-          </div>
-        </template>
-        <template v-else>
-          <p class="crop-hint crop-hint-placeholder">当前为默认展示，点击更换为你的照片</p>
-          <div class="crop-controls crop-controls-placeholder">
-            <button class="change-photo-btn change-photo-btn--solo" type="button" @click="openChangePhotoPicker">
-              更换照片
-            </button>
-          </div>
-        </template>
       </div>
 
       <div class="action-bar">
@@ -364,14 +111,7 @@ function onCropWheel(e: WheelEvent) {
           分享到朋友圈/小红书
         </button>
       </div>
-
-      <p v-if="message" class="toast" :class="{ 'toast-with-photo': displayPhoto }">
-        {{ message }}
-      </p>
     </div>
-
-    <!-- 更换照片选图器：暂隐藏入口，组件保留 -->
-    <PhotoPickerInput ref="photoPickerRef" class="photo-picker-hidden" />
   </div>
 </template>
 
@@ -600,8 +340,6 @@ function onCropWheel(e: WheelEvent) {
   object-fit: cover;
   display: block;
   pointer-events: none;
-  transform: translate(var(--photo-x, 0), var(--photo-y, 0)) scale(var(--photo-scale, 1));
-  transform-origin: center;
   user-select: none;
 }
 
@@ -613,78 +351,6 @@ function onCropWheel(e: WheelEvent) {
   object-fit: fill;
   pointer-events: none;
   z-index: 2;
-}
-
-/* 裁剪面板（提示文案 / 更换照片 / 缩放滑块）：暂隐藏 */
-.crop-panel {
-  display: none !important;
-  position: absolute;
-  left: 35px;
-  right: 35px;
-  top: 652px;
-  margin: 0;
-  z-index: 21;
-  pointer-events: none;
-}
-
-.photo-picker-hidden {
-  display: none;
-}
-
-.crop-hint {
-  margin: 0 0 4px;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 16px;
-  color: rgba(255, 255, 255, 0.86);
-}
-
-.crop-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.crop-btn,
-.change-photo-btn {
-  flex-shrink: 0;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-family: var(--font-mono);
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.crop-btn {
-  width: 26px;
-  height: 26px;
-  font-size: 18px;
-  line-height: 26px;
-}
-
-.change-photo-btn {
-  height: 26px;
-  padding: 0 10px;
-  font-size: 11px;
-  line-height: 26px;
-  white-space: nowrap;
-}
-
-.crop-controls-placeholder {
-  justify-content: center;
-}
-
-.change-photo-btn--solo {
-  min-width: 88px;
-}
-
-.crop-range {
-  min-width: 0;
-  flex: 1;
-  accent-color: #fff3d4;
 }
 
 /* 底部按钮组 */
@@ -776,26 +442,6 @@ function onCropWheel(e: WheelEvent) {
   opacity: 0.65;
 }
 
-/* 提示信息 */
-.toast {
-  position: absolute;
-  left: 35px;
-  right: 35px;
-  top: 690px;
-  margin: 0;
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 18px;
-  color: rgba(255, 255, 255, 0.9);
-  z-index: 23;
-  pointer-events: none;
-}
-
-.toast-with-photo {
-  top: 698px;
-}
-
 @media (max-height: 720px) {
   .photo-body {
     padding-top: 52px;
@@ -827,20 +473,8 @@ function onCropWheel(e: WheelEvent) {
     margin-left: max(-6px, calc(50% - var(--polaroid-w) / 2));
   }
 
-  .crop-panel {
-    top: calc(100dvh - 188px);
-  }
-
   .action-bar {
     top: calc(100dvh - 120px);
-  }
-
-  .toast {
-    top: calc(100dvh - 148px);
-  }
-
-  .toast-with-photo {
-    top: calc(100dvh - 130px);
   }
 }
 

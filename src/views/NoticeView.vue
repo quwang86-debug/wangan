@@ -235,7 +235,7 @@ function onPhotoPicked() {
   position: absolute;
   right: calc(8 / 357 * 100%);
   left: auto;
-  top: calc(490 / 505 * 100%);
+  top: calc(485 / 505 * 100%);
   width: auto;
   max-width: calc(95 / 357 * 100%);
   margin: 0;
