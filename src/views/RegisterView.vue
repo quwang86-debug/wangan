@@ -37,7 +37,7 @@ function closeWecomCard() {
         <div class="section-body">
           <span class="accent-bar accent-bar-wecom" />
           <p class="section-content">
-            2026年<br />即日起 — 8月15日18：00<br />添加校园企微客服完成新生注册
+            2026年<br />即日起 — 8月15日18：00<br /><span class="single-line">添加校园企微客服完成新生注册</span>
           </p>
         </div>
       </div>
@@ -233,7 +233,8 @@ function closeWecomCard() {
   position: absolute;
   left: 19px;
   top: 26px;
-  width: 238.5px;
+  right: 19px;
+  width: auto;
 }
 
 .info-block-wecom .section-body {
@@ -291,8 +292,12 @@ function closeWecomCard() {
 }
 
 .info-block-wecom .section-content {
-  flex: 0 0 216px;
-  width: 216px;
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.single-line {
+  white-space: nowrap;
 }
 
 .info-block-group {
